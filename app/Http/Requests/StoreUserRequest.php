@@ -24,11 +24,11 @@ class StoreUserRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-zء-ي\s]+$/'],
             'last_name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-zء-ي\s]+$/'],
-            'phone' => 'required|string|unique:users,phone|min:8|max:20',
+            'phone' => 'required|string|unique:users,phone|min:10|max:20',
             'birth_date' => 'required|date|before:today',
             'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'id_card_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
-            'password' => 'required|string|min:9|confirmed'
+            'password' => 'required|string|min:8|confirmed'
         ];
     }
 }

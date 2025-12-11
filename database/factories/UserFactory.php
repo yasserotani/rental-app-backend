@@ -16,7 +16,7 @@ class UserFactory extends Factory
             'id_card_image' => 'id_cards/' . $this->faker->unique()->numerify('id####.jpg'),
             'phone' => $this->faker->unique()->numerify('09########'),
             'birth_date' => $this->faker->date(),
-            'password' => Hash::make('password123'), // the hashed password for all users is password123
+            'password' => Hash::make('password'), // the hashed password for all users is password
         ];
     }
 }

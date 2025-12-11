@@ -87,4 +87,27 @@ class UserController extends Controller
         ]);
     }
 
+    public function getUser(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'invalid token',
+                401
+            ]);
+        }
+        $profileImageUrl = $user->profile_image
+            ? asset(str_replace('public/', 'storage/', $user->profile_image))
+            : null;
+        return response()->json([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'phone' => $user->phone,
+            'birth_date' => $user->birth_date,
+            'profile_image_url' => $profileImageUrl,
+            'created_at' => $user->created_at,
+        ]);
+    }
 }
