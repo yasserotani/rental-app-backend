@@ -26,6 +26,7 @@ class UserController extends Controller
                 ->store('private/id_cards');  // storage/app/private
         }
         $data['password'] = Hash::make($data['password']);
+        $data['status'] = 'pending';//بانتظار الموافقة 
         $user = User::create($data);
         //توليد توكن 
         $token = $user->createToken('auth_token')->plainTextToken;

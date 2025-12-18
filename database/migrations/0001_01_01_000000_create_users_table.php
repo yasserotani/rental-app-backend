@@ -20,6 +20,8 @@ return new class extends Migration
         $table->string('phone')->unique()->nullable();
         $table->date('birth_date')->nullable();
         $table->string('password')->nullable();
+          $table->enum('status', ['pending', 'approved', 'rejected'])
+              ->default('pending');
         $table->timestamps();
         });
 
