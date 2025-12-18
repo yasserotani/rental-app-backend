@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,15 +15,16 @@ return new class extends Migration
 
             // علاقة مع المستخدم
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
 
-            $table->string('adress');          // عنوان الشقة
+            $table->string('address')->nullable();          // عنوان الشقة
             $table->text('description');      // وصف الشقة
-            $table->string('governorate');     // المحافظة
-            $table->string('city');            // المدينة
-            $table->decimal('price', 10, 2);   // السعر
-            $table->boolean('is_rented')->default(false); // هل مؤجرة
+            $table->string('governorate')->nullable();     // المحافظة
+            $table->string('city')->nullable();
+            $table->integer('number_of_rooms')->nullable();
+            $table->decimal('price', 10, 2)->nullable();   // السعر
+            $table->boolean('is_rented')->default(false)->nullable(); // هل مؤجرة
 
             $table->timestamps();
         });

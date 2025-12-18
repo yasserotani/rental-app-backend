@@ -13,7 +13,7 @@ use App\Models\Apartment;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -21,16 +21,16 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-            'first_name',
-            'last_name',
-            'profile_image',
-            'id_card_image',
-            'phone',
-            'birth_date',
-            'password',
-        
-         
-        
+        'first_name',
+        'last_name',
+        'profile_image',
+        'id_card_image',
+        'phone',
+        'birth_date',
+        'password',
+
+
+
     ];
 
     /**
@@ -50,15 +50,15 @@ class User extends Authenticatable
      */
     protected function casts(): array
     {
-        return [           
- 'password' => 'hashed',
+        return [
+            'password' => 'hashed',
         ];
     }
 
 
-public function apartments()
-{
-    return $this->hasMany(Apartment::class);
-}
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class);
+    }
 
 }
