@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'profile_image' => 'profile_images/admin.jpg',
                 'id_card_image' => 'id_cards/admin_id.jpg',
                 'birth_date' => '1990-01-01',
-                'password' => Hash::make('test'),
+                'password' => 'testtest',
             ]
         );
 

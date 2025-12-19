@@ -4,25 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-        $table->id();
-        $table->string('first_name')->nullable();
-        $table->string('last_name')->nullable();
-        $table->string('profile_image')->nullable();
-        $table->string('id_card_image')->nullable();
-        $table->string('phone')->unique()->nullable();
-        $table->date('birth_date')->nullable();
-        $table->string('password')->nullable();
-          $table->enum('status', ['pending', 'approved', 'rejected'])
-              ->default('pending');
-        $table->timestamps();
+            $table->id();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('profile_image')->nullable();
+            $table->string('id_card_image')->nullable();
+            $table->string('phone')->unique()->nullable();
+            $table->date('birth_date')->nullable();
+            $table->string('password')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+
+            $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

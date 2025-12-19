@@ -23,16 +23,20 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
-        'profile_image',
-        'id_card_image',
         'phone',
         'birth_date',
+        'profile_image',
+        'id_card_image',
         'password',
-
-
-
+        'status',
     ];
 
+    public function getProfileImageUrlAttribute()
+    {
+        return $this->profile_image
+            ? asset(str_replace('public/', 'storage/', $this->profile_image))
+            : null;
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
