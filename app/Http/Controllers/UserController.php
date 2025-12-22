@@ -109,9 +109,11 @@ class UserController extends Controller
         // إرجاع التوكن واسم المستخدم فقط
         return response()->json([
             'message' => 'Login successful',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user_name' => $user->first_name . ' ' . $user->last_name
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->first_name . $user->last_name
+            ]
         ], 200);
     }
     //=============================================================================================
