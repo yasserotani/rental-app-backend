@@ -21,3 +21,4 @@ Route::get('all_apartments', [ApartmentController::class, 'getAllApartments']);
 // /api/logout
 // /api/self
 // /api/all_apartments
+// /api/check_phone_availability

@@ -18,13 +18,13 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('address')->nullable();          // عنوان الشقة
-            $table->text('description');      // وصف الشقة
-            $table->string('governorate')->nullable();     // المحافظة
-            $table->string('city')->nullable();
-            $table->integer('number_of_rooms')->nullable();
-            $table->decimal('price', 10, 2)->nullable();   // السعر
-            $table->boolean('is_rented')->default(false)->nullable(); // هل مؤجرة
+            $table->string('address');          // عنوان الشقة
+            $table->text('description')->nullable();      // وصف الشقة
+            $table->string('governorate');     // المحافظة
+            $table->string('city');
+            $table->integer('number_of_rooms');
+            $table->decimal('price', 10, 2);   // السعر
+            $table->boolean('is_rented')->default(false); // هل مؤجرة
 
             $table->timestamps();
         });

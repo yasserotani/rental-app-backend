@@ -31,12 +31,12 @@ class User extends Authenticatable
         'status',
     ];
 
-    public function getProfileImageUrlAttribute()
-    {
-        return $this->profile_image
-            ? asset(str_replace('public/', 'storage/', $this->profile_image))
-            : null;
-    }
+    // public function getProfileImageUrlAttribute()
+    // {
+    //     return $this->profile_image
+    //         ? asset(str_replace('public/', 'storage/', $this->profile_image))
+    //         : null;
+    // }
     /**
      * The attributes that should be hidden for serialization.
      *

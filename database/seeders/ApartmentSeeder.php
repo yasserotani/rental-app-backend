@@ -17,6 +17,7 @@ class ApartmentSeeder extends Seeder
     {
         Apartment::factory()
             ->count(20)
+            ->hasImages(3)
             ->create();
     }
 }
