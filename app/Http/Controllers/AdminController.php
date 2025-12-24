@@ -61,6 +61,7 @@ return response()->json([
         'token' => $token
     ]);
 }
+
    Public function delete_user($id){
 $user=User::find($id);
 if(!$user){
@@ -83,7 +84,7 @@ public function Accept_user($id)
         return response()->json(['message' => 'User not found'], 404);
     }
 
-    $user->update(['enum' => 'approved']);
+    $user->update(['status' => 'approved']);
 
     return response()->json(['message' => 'User accepted successfully'], 200);
 }
@@ -96,7 +97,7 @@ public function Reject_user($id)
             'message' => 'User not found'
         ], 404);
     }
-    $user->update(['enum' => 'approved']);
+    $user->update(['status' => 'rejected']);
     return response()->json([
         'message' => 'User rejected successfully',
     ], 200);
