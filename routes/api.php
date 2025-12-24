@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
+
+
 use APP\Http\Controllers;
 use App\Models\Apartment;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +19,12 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('all_apartments', [ApartmentController::class, 'getAllApartments']);
 
-// /api/register
-// /api/login
-// /api/logout
-// /api/self
-// /api/all_apartments
-// /api/check_phone_availability
+
+Route::post('login_admin', [AdminController::class, 'login_admin']);
+
+Route::middleware(['auth:admin','abilities:admin'])->group(function(){
+      Route::get('get_All_Users',[AdminController::class,'get_All_Users']);
+      Route::delete('delete_user/{id}',[AdminController::class,'delete_user']);
+      Route::patch('accept_user/{id}',[AdminController::class,'Accept_user']);
+      Route::patch('reject_user/{id}',[AdminController::class,'Reject_user']);
+}); 
