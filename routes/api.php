@@ -27,14 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('login_admin', [AdminController::class, 'login_admin']);
 
-Route::middleware(['auth:admin','abilities:admin'])->group(function(){
-      Route::get('get_All_Users',[AdminController::class,'get_All_Users']);
-      Route::delete('delete_user/{id}',[AdminController::class,'delete_user']);
-      Route::patch('accept_user/{id}',[AdminController::class,'Accept_user']);
-      Route::patch('reject_user/{id}',[AdminController::class,'Reject_user']);
-}); 
+Route::middleware(['auth:admin', 'abilities:admin'])->group(function () {
+    Route::get('get_All_Users', [AdminController::class, 'get_All_Users']);
+    Route::delete('delete_user/{id}', [AdminController::class, 'delete_user']);
+    Route::patch('accept_user/{id}', [AdminController::class, 'Accept_user']);
+    Route::patch('reject_user/{id}', [AdminController::class, 'Reject_user']);
+});
 
-    Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
+Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
 
 Route::get('user_apartments', [ApartmentController::class, 'getUserApartments']);
 
@@ -48,4 +48,3 @@ Route::get('user_apartments', [ApartmentController::class, 'getUserApartments'])
 // POST   /api/logout                    - Logout (requires auth)
 // GET    /api/self                      - Get current user data (requires auth)
 // POST   /api/create_apartment          - create a new apartment for the user ,( required auth)
-

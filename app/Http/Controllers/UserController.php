@@ -106,13 +106,21 @@ class UserController extends Controller
         // إنشاء توكن Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $profileImageUrl = $user->profile_image
+            ? asset(str_replace('public/', 'storage/', $user->profile_image))
+            : null;
         // إرجاع التوكن واسم المستخدم فقط
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => [
+            'user_data' => [
                 'id' => $user->id,
-                'name' => $user->first_name . $user->last_name
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone' => $user->phone,
+                'birth_date' => $user->birth_date,
+                'profile_image_url' => $profileImageUrl,
+                'created_at' => $user->created_at,
             ]
         ], 200);
     }
