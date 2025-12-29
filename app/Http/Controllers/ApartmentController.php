@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ApartmentResource;
 use App\Models\Apartment;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use App\Http\Resources\ApartmentResource;
+use Illuminate\Support\Facades\Auth;
 
 class ApartmentController extends Controller
 {
-
     public function getAllApartments()
     {
         $apartments = Apartment::with('images')->get();
@@ -18,9 +17,10 @@ class ApartmentController extends Controller
         return response()->json([
             'message' => 'get apartments success',
             'apartments' => ApartmentResource::collection($apartments),
-            'count' => $apartments->count()
+            'count' => $apartments->count(),
         ], 200);
     }
+
     public function createApartments(Request $request)
     {
         try {
@@ -37,20 +37,20 @@ class ApartmentController extends Controller
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
             ]);
             $apartment = Apartment::create([
-                'user_id' => auth()->id(), // accept only auth users
+                'user_id' => Auth::id(), // accept only auth users
                 'address' => $request->address,
                 'description' => $request->description,
                 'city' => $request->city,
                 'governorate' => $request->governorate,
                 'price' => $request->price,
                 'number_of_rooms' => $request->number_of_rooms,
-                'is_rented' => $request->is_rented ?? false,//false is default
+                'is_rented' => $request->is_rented ?? false, // false is default
             ]);
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('public/apartment_images');
                     $apartment->images()->create([
-                        'image_path' => $path
+                        'image_path' => $path,
                     ]);
                 }
             }
@@ -60,13 +60,11 @@ class ApartmentController extends Controller
                 200
             );
 
-
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Apartment creation failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -74,7 +72,7 @@ class ApartmentController extends Controller
     public function getUserApartments(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id'
+            'user_id' => 'required|integer|exists:users,id',
         ]);
 
         $apartments = Apartment::where('user_id', $request->user_id)
@@ -84,8 +82,25 @@ class ApartmentController extends Controller
         return response()->json([
             'message' => 'User apartments retrieved successfully',
             'apartments' => ApartmentResource::collection($apartments),
-            'count' => $apartments->count()
+            'count' => $apartments->count(),
         ], 200);
     }
 
+    public function getAllApartmentBookings($id)
+    {
+        $apartmentId = $id;
+        $apartment = Apartment::find($apartmentId);
+        $bookings = $apartment->bookings()->where('end_date', '>=', now())->get();
+
+        if ($bookings->count() == 0) {
+            return response()->json([
+                'message' => 'No bookings found !',
+            ], 400);
+        }
+
+        return response()->json([
+            'message' => 'Bookings retrieved successfully',
+            'bookings' => $bookings,
+        ], 200);
+    }
 }

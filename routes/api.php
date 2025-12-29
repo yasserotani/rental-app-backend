@@ -1,12 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\UserController;
-
-use App\Http\Controllers\AdminController;
-
-
-use APP\Http\Controllers;
 use App\Models\Apartment;
 use Illuminate\Support\Facades\Route;
 
@@ -16,30 +12,26 @@ Route::post('login', [UserController::class, 'login']);
 Route::post('check_phone_availability', [UserController::class, 'checkAvailableNumber']);
 
 Route::get('apartments', [ApartmentController::class, 'getAllApartments']);
-
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('apartment_bookings/{id}', [ApartmentController::class, 'getAllApartmentBookings']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::get('self', [UserController::class, 'getUser']);
+    Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
 });
-
 
 Route::post('login_admin', [AdminController::class, 'login_admin']);
 
-//admin
+// admin
 Route::middleware(['auth:admin', 'abilities:admin'])->group(function () {
     Route::get('get_All_Users', [AdminController::class, 'get_All_Users']);
     Route::delete('delete_user/{id}', [AdminController::class, 'delete_user']);
     Route::patch('accept_user/{id}', [AdminController::class, 'Accept_user']);
     Route::patch('reject_user/{id}', [AdminController::class, 'Reject_user']);
-    Route::get('user/{id}',[AdminController::class,'get_user']);
-    Route::get('pending_users' , [AdminController::class,'getAllPendingsUsers']);
+    Route::get('user/{id}', [AdminController::class, 'get_user']);
+    Route::get('pending_users', [AdminController::class, 'getAllPendingsUsers']);
 });
 
-Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
-
 Route::get('user_apartments', [ApartmentController::class, 'getUserApartments']);
-
-
 
 // POST   /api/register                  - Register new user
 // POST   /api/login                     - Login user
