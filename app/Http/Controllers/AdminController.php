@@ -14,7 +14,7 @@ class AdminController extends Controller
     public function get_All_Users(Request $request)
     {
         try {
-            $users = User::orderBy('created_at', 'desc')->get();
+            $users = User::orderBy('created_at', 'desc')->paginate(10);
 
             $usersData = $users->map(function ($user) {
                 return [
@@ -117,6 +117,19 @@ public function get_user($id){
         'data'=>$user
     ],200);
 
+}
+public function getAllPendingsUsers(){
+    $pendingUsers = User::where('status','pending')->get();
+
+    if (!$pendingUsers) {
+        return response()->json([
+            'message' => 'There is no pending users'
+        ], 404);
+    } 
+    return response()->json([
+        'message' => 'success',
+        'data' => $pendingUsers
+    ]);
 }
 }
 
