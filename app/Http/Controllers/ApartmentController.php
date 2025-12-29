@@ -56,10 +56,12 @@ class ApartmentController extends Controller
             }
 
             return response()->json(
-                ['message' => 'Apartment created successfully'],
+                [
+                    'message' => 'Apartment created successfully',
+                    'data' => $apartment
+                ],
                 200
             );
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -86,7 +88,7 @@ class ApartmentController extends Controller
         ], 200);
     }
 
-    public function getAllApartmentBookings($id)
+    public static function getAllApartmentBookings($id)
     {
         $apartmentId = $id;
         $apartment = Apartment::find($apartmentId);

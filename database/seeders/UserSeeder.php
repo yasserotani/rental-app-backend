@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -20,6 +21,18 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'test',
                 'last_name' => 'test',
+                'profile_image' => 'profile_images/admin.jpg',
+                'id_card_image' => 'id_cards/admin_id.jpg',
+                'birth_date' => '1990-01-01',
+                'password' => 'testtest',
+            ]
+        );
+        // test user 2
+        User::updateOrCreate(
+            ['phone' => '0987654321'], // unique identifier
+            [
+                'first_name' => 'test2',
+                'last_name' => 'test2',
                 'profile_image' => 'profile_images/admin.jpg',
                 'id_card_image' => 'id_cards/admin_id.jpg',
                 'birth_date' => '1990-01-01',
