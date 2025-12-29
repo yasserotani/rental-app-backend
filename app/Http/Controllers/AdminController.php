@@ -104,6 +104,19 @@ class AdminController extends Controller
         ], 200);
     }
 
+public function get_user($id){
+      $user = User::find($id);
 
+    if (!$user) {
+        return response()->json([
+            'message' => 'User not found'
+        ], 404);
+    }
+    return response()->json([
+        'message' => 'User get successfully',
+        'data'=>$user
+    ],200);
+
+}
 }
 
