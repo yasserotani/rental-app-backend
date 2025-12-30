@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Review;
 
 class Apartment extends Model
 {
@@ -34,8 +35,8 @@ class Apartment extends Model
     {
         return $this->hasMany(Booking::class);
     }
-     public function reviews()
+    public function reviews()
     {
-        return $this->hasMany(Reviews::class);
+        return $this->hasMany(Review::class);
     }
 }

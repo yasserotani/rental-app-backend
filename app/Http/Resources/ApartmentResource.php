@@ -23,9 +23,7 @@ class ApartmentResource extends JsonResource
                 // to format the images url
                 return [
                     'id' => $image->id,
-                    'image_url' => asset(
-                        str_replace('public/', 'storage/', $image->image_path)
-                    )
+                    'image_url' => asset('storage/' . str_replace('public/', '', $image->image_path))
                 ];
             }),
             'created_at' => $this->created_at,

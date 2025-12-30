@@ -29,6 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
     Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
     Route::get('/bookings/user_bookings', [BookingController::class, 'getAllUserBookings']);
+
+    // Reviews
+    Route::post('/apartments/{apartment_id}/review', [UserController::class, 'review']);
 });
 
 Route::post('login_admin', [AdminController::class, 'login_admin']);

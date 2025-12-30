@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Apartment;
+use App\Models\Review;
 
 class User extends Authenticatable
 {
@@ -70,6 +71,6 @@ class User extends Authenticatable
     }
     public function reviews()
     {
-        return $this->hasMany(Reviews::class);
+        return $this->hasMany(Review::class);
     }
 }

@@ -26,7 +26,7 @@ class AdminController extends Controller
                     'birth_date' => $user->birth_date,
                     'status' => $user->status,
                     'profile_image_url' => $user->profile_image
-                        ? asset(str_replace('public/', 'storage/', $user->profile_image))
+                        ? asset('storage/' . str_replace('public/', '', $user->profile_image))
                         : null,
                 ];
             });
@@ -122,9 +122,9 @@ class AdminController extends Controller
     {
         $pendingUsers = User::where('status', 'pending')->get();
 
-        if (!$pendingUsers) {
+        if ($pendingUsers->isEmpty()) {
             return response()->json([
-                'message' => 'There is no pending users'
+                'message' => 'There are no pending users'
             ], 404);
         }
         return response()->json([

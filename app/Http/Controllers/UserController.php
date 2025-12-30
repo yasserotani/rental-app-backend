@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Booking;
 use App\Models\Review;
-use App\Models\reviews;
 
 class UserController extends Controller
 {
@@ -24,13 +23,15 @@ class UserController extends Controller
 
         try {
             if ($request->hasFile('profile_image')) {
+                // Store in public disk for accessible images
                 $data['profile_image'] = $request->file('profile_image')
-                    ->store('public/profile_images');   //  storage/app/public
+                    ->store('profile_images', 'public');   // storage/app/public/profile_images
             }
 
             if ($request->hasFile('id_card_image')) {
+                // Store in private disk for sensitive documents
                 $data['id_card_image'] = $request->file('id_card_image')
-                    ->store('private/id_cards');  // storage/app/private
+                    ->store('id_cards', 'private');  // storage/app/private/id_cards
             }
             $data['password'] = Hash::make($data['password']);
             $data['status'] = 'pending'; //بانتظار الموافقة 
@@ -39,8 +40,9 @@ class UserController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
 
             //توليد رابط للصورة منشان الفلاتر يفتحها فورا
+            // Handle both old format (public/profile_images/...) and new format (profile_images/...)
             $profileImageUrl = $user->profile_image
-                ? asset(str_replace('public/', 'storage/', $user->profile_image))
+                ? asset('storage/' . str_replace('public/', '', $user->profile_image))
                 : null;
             //شو رح يرجع
             return response()->json([
@@ -110,8 +112,9 @@ class UserController extends Controller
         // إنشاء توكن Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Handle both old format (public/profile_images/...) and new format (profile_images/...)
         $profileImageUrl = $user->profile_image
-            ? asset(str_replace('public/', 'storage/', $user->profile_image))
+            ? asset('storage/' . str_replace('public/', '', $user->profile_image))
             : null;
         // إرجاع التوكن واسم المستخدم فقط
         return response()->json([
@@ -152,8 +155,9 @@ class UserController extends Controller
                 'message' => 'invalid token'
             ], 401);
         }
+        // Handle both old format (public/profile_images/...) and new format (profile_images/...)
         $profileImageUrl = $user->profile_image
-            ? asset(str_replace('public/', 'storage/', $user->profile_image))
+            ? asset('storage/' . str_replace('public/', '', $user->profile_image))
             : null;
         return response()->json([
             'message' => 'success',
@@ -171,11 +175,13 @@ class UserController extends Controller
     public function review(Request $request, $apartment_id)
     {
         $validatedData = $request->validate([
-            'apartment_id' => 'required|exists:apartments,id',
-            'user_id' => 'required|exists:users,id',
             'rating' => 'required|integer|between:1,5',
             'comment' => 'nullable|string',
         ]);
+
+        // Validate apartment exists
+        $apartment = \App\Models\Apartment::findOrFail($apartment_id);
+
         $user = Auth::user();
 
         // تحقق أن المستخدم لديه حجز Approved للشقة
@@ -190,13 +196,23 @@ class UserController extends Controller
             ], 403);
         }
 
+        // Check if user already reviewed this apartment
+        $existingReview = Review::where('user_id', $user->id)
+            ->where('apartment_id', $apartment_id)
+            ->exists();
+
+        if ($existingReview) {
+            return response()->json([
+                'message' => 'You have already reviewed this apartment.'
+            ], 409);
+        }
 
         // إضافة user_id و apartment_id
         $validatedData['user_id'] = $user->id;
         $validatedData['apartment_id'] = $apartment_id;
 
         // إنشاء التقييم
-        $review = reviews::create($validatedData);
+        $review = Review::create($validatedData);
 
         return response()->json([
             'message' => 'Review submitted successfully',

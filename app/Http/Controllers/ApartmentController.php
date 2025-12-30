@@ -48,7 +48,7 @@ class ApartmentController extends Controller
             ]);
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('public/apartment_images');
+                    $path = $image->store('apartment_images', 'public');
                     $apartment->images()->create([
                         'image_path' => $path,
                     ]);
@@ -88,16 +88,23 @@ class ApartmentController extends Controller
         ], 200);
     }
 
-    public static function getAllApartmentBookings($id)
+    public function getAllApartmentBookings($id)
     {
-        $apartmentId = $id;
-        $apartment = Apartment::find($apartmentId);
+        $apartment = Apartment::findOrFail($id);
+
+        // Check if user owns the apartment
+        if ($apartment->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'You do not own this apartment!',
+            ], 403);
+        }
+
         $bookings = $apartment->bookings()->where('end_date', '>=', now())->get();
 
-        if ($bookings->count() == 0) {
+        if ($bookings->isEmpty()) {
             return response()->json([
-                'message' => 'No bookings found !',
-            ], 400);
+                'message' => 'No bookings found!',
+            ], 404);
         }
 
         return response()->json([
