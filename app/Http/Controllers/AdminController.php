@@ -104,32 +104,32 @@ class AdminController extends Controller
         ], 200);
     }
 
-public function get_user($id){
-      $user = User::find($id);
+    public function get_user($id)
+    {
+        $user = User::find($id);
 
-    if (!$user) {
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
         return response()->json([
-            'message' => 'User not found'
-        ], 404);
+            'message' => 'User get successfully',
+            'data' => $user
+        ], 200);
     }
-    return response()->json([
-        'message' => 'User get successfully',
-        'data'=>$user
-    ],200);
+    public function getAllPendingsUsers()
+    {
+        $pendingUsers = User::where('status', 'pending')->get();
 
-}
-public function getAllPendingsUsers(){
-    $pendingUsers = User::where('status','pending')->get();
-
-    if (!$pendingUsers) {
+        if (!$pendingUsers) {
+            return response()->json([
+                'message' => 'There is no pending users'
+            ], 404);
+        }
         return response()->json([
-            'message' => 'There is no pending users'
-        ], 404);
-    } 
-    return response()->json([
-        'message' => 'success',
-        'data' => $pendingUsers
-    ]);
+            'message' => 'success',
+            'data' => $pendingUsers
+        ]);
+    }
 }
-}
-

@@ -14,14 +14,15 @@ class Booking extends Model
         'apartment_id',
         'start_date',
         'end_date',
-        'status'
+        'status',
+        'total_price',
     ];
     public function user()
     {
-          return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);
     }
     public function apartment()
     {
-          return $this->belongsTo(Apartment::class);
+        return $this->belongsTo(Apartment::class);
     }
 }

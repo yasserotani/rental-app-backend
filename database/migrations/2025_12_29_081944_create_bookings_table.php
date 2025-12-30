@@ -21,8 +21,9 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->date('start_date');
             $table->date('end_date');
-            $table->enum('status',['pending','approved','rejected','cancelled'])
-                    ->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])
+                ->default('pending');
+            $table->decimal('total_price', 10, 2);
 
             $table->timestamps();
         });

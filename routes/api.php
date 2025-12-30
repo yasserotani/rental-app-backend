@@ -22,12 +22,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // apartment
     Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
     Route::get('apartment_bookings/{id}', [ApartmentController::class, 'getAllApartmentBookings']);
-Route::get('/apartments', [ApartmentController::class, 'search']);
+    Route::get('/apartments', [ApartmentController::class, 'search']);
     // Booking 
     Route::post('/bookings', [BookingController::class, 'createBook']);
     Route::post('/bookings/{id}/approve', [BookingController::class, 'approve']);
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
     Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+    Route::get('/bookings/user_bookings', [BookingController::class, 'getAllUserBookings']);
 });
 
 Route::post('login_admin', [AdminController::class, 'login_admin']);

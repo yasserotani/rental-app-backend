@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class UserController extends Controller
                     ->store('private/id_cards');  // storage/app/private
             }
             $data['password'] = Hash::make($data['password']);
-            $data['status'] = 'pending';//بانتظار الموافقة 
+            $data['status'] = 'pending'; //بانتظار الموافقة 
             $user = User::create($data);
             //توليد توكن 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -82,7 +83,6 @@ class UserController extends Controller
         return response()->json([
             'message' => 'phone number is available'
         ], 200);
-
     }
     //=============================================================================================
     public function login(Request $request)
@@ -132,7 +132,10 @@ class UserController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user(); // المستخدم الذي أرسل التوكن
-        $user->currentAccessToken()->delete(); // حذف التوكن الحالي فقط منشان لو مسجل من اكتر من خادم مايأثر على الباقي
+        $tokenId = $user->currentAccessToken()?->id;
+        if ($tokenId) {
+            $user->tokens()->where('id', $tokenId)->delete(); // حذف التوكن الحالي فقط منشان لو مسجل من اكتر من خادم مايأثر على الباقي
+        }
 
         return response()->json([
             'message' => 'Logged out successfully'
@@ -166,38 +169,38 @@ class UserController extends Controller
         ]);
     }
     public function review(Request $request, $apartment_id)
-{
-    $validatedData = $request->validate([
-        'apartment_id' => 'required|exists:apartments,id',
-        'user_id' => 'required|exists:users,id',
-        'rating' => 'required|integer|between:1,5',
-        'comment' => 'nullable|string',
-    ]);
-    $user = Auth::user();
+    {
+        $validatedData = $request->validate([
+            'apartment_id' => 'required|exists:apartments,id',
+            'user_id' => 'required|exists:users,id',
+            'rating' => 'required|integer|between:1,5',
+            'comment' => 'nullable|string',
+        ]);
+        $user = Auth::user();
 
-    // تحقق أن المستخدم لديه حجز Approved للشقة
-    $hasBooking = Booking::where('user_id', $user->id)
-        ->where('apartment_id', $apartment_id)
-        ->where('status', 'approved')
-        ->exists();
+        // تحقق أن المستخدم لديه حجز Approved للشقة
+        $hasBooking = Booking::where('user_id', $user->id)
+            ->where('apartment_id', $apartment_id)
+            ->where('status', 'approved')
+            ->exists();
 
-    if (!$hasBooking) {
+        if (!$hasBooking) {
+            return response()->json([
+                'message' => 'You can only review apartments you have rented.'
+            ], 403);
+        }
+
+
+        // إضافة user_id و apartment_id
+        $validatedData['user_id'] = $user->id;
+        $validatedData['apartment_id'] = $apartment_id;
+
+        // إنشاء التقييم
+        $review = reviews::create($validatedData);
+
         return response()->json([
-            'message' => 'You can only review apartments you have rented.'
-        ], 403);
+            'message' => 'Review submitted successfully',
+            'review' => $review
+        ], 201);
     }
-
-
-    // إضافة user_id و apartment_id
-    $validatedData['user_id'] = $user->id;
-    $validatedData['apartment_id'] = $apartment_id;
-
-    // إنشاء التقييم
-    $review = reviews::create($validatedData);
-
-    return response()->json([
-        'message' => 'Review submitted successfully',
-        'review' => $review
-    ], 201);
-}
 }

@@ -69,6 +69,11 @@ class BookingController extends Controller
             ], 403);
         }
 
+        //count the total price
+        $days = $startDate->diffInDays($endDate) + 1;
+        $pricePerDay = $apartment->price;
+        $totalPrice = $days * $pricePerDay;
+
         // create the booking with pending status (wait for owner approval)
         $booking = Booking::create([
             'user_id' => $user->id,
@@ -76,6 +81,7 @@ class BookingController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => 'pending',
+            'total_price' => $totalPrice,
         ]);
 
         return response()->json([
@@ -103,8 +109,11 @@ class BookingController extends Controller
         // check if the dates conflict with an existing approved booking 
         $startDate = Carbon::parse($booking->start_date);
         $endDate = Carbon::parse($booking->end_date);
+
+        //get all approved booking except this one
         $allBookings = $booking->apartment->bookings()
             ->where('status', 'approved')
+            ->where('id', '!=', $booking->id)
             ->where('end_date', '>=', now())
             ->get();
 
@@ -115,7 +124,7 @@ class BookingController extends Controller
             );
             if ($hasConflict) {
                 return response()->json([
-                    'message' => 'Cannot approve approvedBooking. Dates conflict with an existing approved approvedBooking.',
+                    'message' => 'Cannot approve approvedBooking. Dates conflict with an existing approved booking.',
                     'conflicting_approvedBooking' => [
                         'id' => $approvedBooking->id,
                         'start_date' => $approvedBooking->start_date,
@@ -131,16 +140,11 @@ class BookingController extends Controller
                 'message' => 'Only pending bookings can be approved'
             ], 400);
         }
-        // the owner cannot book his own apartment
-        if ($booking->apartment->user_id === Auth::id()) {
-            return response()->json([
-                'message' => 'You cannot book your own apartment'
-            ], 403);
-        }
         // approve the booking
         $booking->update([
             'status' => 'approved',
         ]);
+
 
         return response()->json([
             'message' => 'Booking approved successfully',
@@ -150,6 +154,7 @@ class BookingController extends Controller
                 'start_date' => $booking->start_date,
                 'end_date' => $booking->end_date,
                 'status' => $booking->status,
+                'total_price' => $booking->total_price,
             ]
         ], 200);
     }
@@ -211,6 +216,16 @@ class BookingController extends Controller
                 'id' => $booking->id,
                 'status' => $booking->status,
             ]
+        ], 200);
+    }
+    public function getAllUserBookings(Request $request)
+    {
+        $user = $request->user();
+
+        $userBookings = $user->bookings()->with('apartment')->get();
+        return response()->json([
+            'message' => 'getting user bookings success',
+            'data' => $userBookings
         ], 200);
     }
 }

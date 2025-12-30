@@ -7,6 +7,7 @@ use App\Models\Apartment;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class ApartmentController extends Controller
 {
     public function getAllApartments()
@@ -105,35 +106,35 @@ class ApartmentController extends Controller
         ], 200);
     }
     public function search(Request $request)
-{
-    $query = Apartment::query();
+    {
+        $query = Apartment::query();
 
-    if ($request->filled('governorate')) {
-        $query->where('governorate', $request->governorate);
+        if ($request->filled('governorate')) {
+            $query->where('governorate', $request->governorate);
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', $request->city);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+        if ($request->filled('min_rooms')) {
+            $query->where('number_of_rooms', '>=', $request->min_rooms);
+        }
+        if ($request->filled('max_rooms')) {
+            $query->where('number_of_rooms', '<=', $request->max_rooms);
+        }
+        $apartments = $query->paginate(10);
+
+        return response()->json($apartments);
     }
 
-    if ($request->filled('city')) {
-        $query->where('city', $request->city);
-    }
-
-    if ($request->filled('min_price')) {
-        $query->where('price', '>=', $request->min_price);
-    }
-
-    if ($request->filled('max_price')) {
-        $query->where('price', '<=', $request->max_price);
-    }
-if($request->filled('min_rooms')){
-$query->where('number_of_rooms','>=',$request->min_rooms);
-}
-if($request->filled('max_rooms')){
-$query->where('number_of_rooms','<=',$request->max_rooms);
-}
-    $apartments = $query->paginate(10);
-
-    return response()->json($apartments);
-}
-
-///
+    ///
 
 }
