@@ -2,23 +2,17 @@
 
 namespace Database\Factories;
 
+use App\Models\ApartmentImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Apartment;
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ApartmentImage>
- */
+
 class ApartmentImageFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ApartmentImage::class;
+
     public function definition(): array
     {
         return [
-            'apartment_id' => Apartment::factory(),
-            'image_path' => 'public/apartment_images/fake.jpg',
+            'image_path' => 'apartments/' . $this->faker->image('public/storage/apartments', 640, 480, null, false),
         ];
     }
 }

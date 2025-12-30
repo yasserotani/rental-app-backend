@@ -13,7 +13,7 @@ class ApartmentSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+  public function run(): void
     {
         Apartment::factory()
             ->count(20)

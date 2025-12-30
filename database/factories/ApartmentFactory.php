@@ -12,15 +12,26 @@ class ApartmentFactory extends Factory
 
     public function definition(): array
     {
+        $governorates = ['دمشق', 'ريف دمشق', 'حمص', 'حلب'];
+        $cities = [
+            'دمشق' => ['المزة', 'المالكي', 'برزة'],
+            'ريف دمشق' => ['جرمانا', 'قدسيا', 'دوما'],
+            'حمص' => ['الوعر', 'الزهراء'],
+            'حلب' => ['الحمدانية', 'السكري'],
+        ];
+
+        $gov = $this->faker->randomElement($governorates);
+        $city = $this->faker->randomElement($cities[$gov]);
+
         return [
             'user_id' => User::factory(),
-            'address' => $this->faker->address(),
+            'address' => $this->faker->streetAddress(),
             'description' => $this->faker->sentence(10),
-            'city' => $this->faker->city(),
-            'governorate' => $this->faker->state(),
-            'price' => $this->faker->numberBetween(200, 1500),
-            'number_of_rooms' => $this->faker->numberBetween(1, 6), // ✅ ADD THIS
-            'is_rented' => false,
+            'city' => $city,
+            'governorate' => $gov,
+            'price' => $this->faker->numberBetween(300000, 1500000),
+            'number_of_rooms' => $this->faker->numberBetween(1, 6),
+            'is_rented' => $this->faker->boolean(30),
         ];
     }
 }
