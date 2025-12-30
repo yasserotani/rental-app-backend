@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Booking;
+use App\Models\Review;
+use App\Models\reviews;
+
 class UserController extends Controller
 {
 
@@ -161,4 +165,39 @@ class UserController extends Controller
             ]
         ]);
     }
+    public function review(Request $request, $apartment_id)
+{
+    $validatedData = $request->validate([
+        'apartment_id' => 'required|exists:apartments,id',
+        'user_id' => 'required|exists:users,id',
+        'rating' => 'required|integer|between:1,5',
+        'comment' => 'nullable|string',
+    ]);
+    $user = Auth::user();
+
+    // تحقق أن المستخدم لديه حجز Approved للشقة
+    $hasBooking = Booking::where('user_id', $user->id)
+        ->where('apartment_id', $apartment_id)
+        ->where('status', 'approved')
+        ->exists();
+
+    if (!$hasBooking) {
+        return response()->json([
+            'message' => 'You can only review apartments you have rented.'
+        ], 403);
+    }
+
+
+    // إضافة user_id و apartment_id
+    $validatedData['user_id'] = $user->id;
+    $validatedData['apartment_id'] = $apartment_id;
+
+    // إنشاء التقييم
+    $review = reviews::create($validatedData);
+
+    return response()->json([
+        'message' => 'Review submitted successfully',
+        'review' => $review
+    ], 201);
+}
 }
