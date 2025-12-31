@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
             'birth_date' => 'required|date|before:today',
             'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'id_card_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
-            'password' => 'required|string|min:8|confirmed'
+            'password' => 'required|string|min:8'
         ];
     }
 }

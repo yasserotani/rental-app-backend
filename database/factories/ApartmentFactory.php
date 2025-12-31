@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Apartment;
+use App\Models\ApartmentImage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -29,9 +30,24 @@ class ApartmentFactory extends Factory
             'description' => $this->faker->sentence(10),
             'city' => $city,
             'governorate' => $gov,
-            'price' => $this->faker->numberBetween(300000, 1500000),
+            'price' => $this->faker->numberBetween(1000, int2: 10000),
             'number_of_rooms' => $this->faker->numberBetween(1, 6),
             'is_rented' => $this->faker->boolean(30),
         ];
+    }
+
+    /**
+     * Configure the factory to automatically create apartment images.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Apartment $apartment) {
+            // Create 2-5 images for each apartment
+            $imageCount = rand(2, 5);
+            ApartmentImage::factory()
+                ->count($imageCount)
+                ->for($apartment)
+                ->create();
+        });
     }
 }

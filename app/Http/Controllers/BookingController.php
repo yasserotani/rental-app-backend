@@ -124,7 +124,7 @@ class BookingController extends Controller
             );
             if ($hasConflict) {
                 return response()->json([
-                    'message' => 'Cannot approve approvedBooking. Dates conflict with an existing approved booking.',
+                    'message' => 'Cannot approve thisBooking. Dates conflict with an existing approved booking.',
                     'conflicting_approvedBooking' => [
                         'id' => $approvedBooking->id,
                         'start_date' => $approvedBooking->start_date,
@@ -218,11 +218,21 @@ class BookingController extends Controller
             ]
         ], 200);
     }
-    public function getAllUserBookings(Request $request)
+    public function getAllUserBookings()
     {
-        $user = $request->user();
 
-        $userBookings = $user->bookings()->with('apartment')->get();
+        $userBookings = Auth::user()
+            ->bookings()
+            ->with('apartment')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        if ($userBookings->isEmpty()) {
+            return response()->json([
+                'message' => 'No Bookings found',
+                'Bookings' => []
+            ], 200);
+        }
         return response()->json([
             'message' => 'getting user bookings success',
             'data' => $userBookings

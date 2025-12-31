@@ -4,7 +4,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\UserController;
-use App\Models\Apartment;
+use App\Http\Controllers\ReviewsController;
+use App\Http\Controllers\FavoritesController;
 use Illuminate\Support\Facades\Route;
 
 // auth
@@ -22,7 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // apartment
     Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
     Route::get('apartment_bookings/{id}', [ApartmentController::class, 'getAllApartmentBookings']);
-    Route::get('/apartments', [ApartmentController::class, 'search']);
+    Route::get('/apartments/search', [ApartmentController::class, 'search']);
+
     // Booking 
     Route::post('/bookings', [BookingController::class, 'createBook']);
     Route::post('/bookings/{id}/approve', [BookingController::class, 'approve']);
@@ -31,7 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/user_bookings', [BookingController::class, 'getAllUserBookings']);
 
     // Reviews
-    Route::post('/apartments/{apartment_id}/review', [UserController::class, 'review']);
+    Route::post('/apartments/{apartment_id}/review', [ReviewsController::class, 'review']);
+
+    //favorites 
+    Route::post('/favorites/{apartmentId}/toggle', [FavoritesController::class, 'toggleFavorite']);
+    Route::get('/favorites/', [FavoritesController::class, 'getAllUserFavorites']);
 });
 
 Route::post('login_admin', [AdminController::class, 'login_admin']);
