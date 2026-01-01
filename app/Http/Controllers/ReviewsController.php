@@ -47,12 +47,22 @@ class ReviewsController extends Controller
             ], 409);
         }
 
+
         // إضافة user_id و apartment_id
         $validatedData['user_id'] = $user->id;
         $validatedData['apartment_id'] = $apartment_id;
 
         // إنشاء التقييم
         $review = Review::create($validatedData);
+
+        // update the apartment average rating
+        $averageRating = $apartment->reviews()->avg('rating'); // avg function return the average of the ratings
+        $reviewsCount = $apartment->reviews()->count(); // count function return the number of reviews
+
+        $apartment->update([
+            'average_rating' => $averageRating,
+            'reviews_count' => $reviewsCount,
+        ]);
 
         return response()->json([
             'message' => 'Review submitted successfully',

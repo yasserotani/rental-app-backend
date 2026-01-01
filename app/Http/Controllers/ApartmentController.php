@@ -12,12 +12,19 @@ class ApartmentController extends Controller
 {
     public function getAllApartments()
     {
-        $apartments = Apartment::with('images')->get();
+        $apartments = Apartment::with('images')->paginate(10);
 
         return response()->json([
             'message' => 'get apartments success',
-            'apartments' => ApartmentResource::collection($apartments),
-            'count' => $apartments->count(),
+            'data' => ApartmentResource::collection($apartments),
+            'pagination' => [
+                'current_page' => $apartments->currentPage(),
+                'last_page' => $apartments->lastPage(),
+                'per_page' => $apartments->perPage(),
+                'total' => $apartments->total(),
+                'next_page_url' => $apartments->nextPageUrl(),
+                'prev_page_url' => $apartments->previousPageUrl(),
+            ],
         ], 200);
     }
 
@@ -26,24 +33,30 @@ class ApartmentController extends Controller
         try {
 
             $request->validate([
+                'title' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
                 'description' => 'nullable|string|max:1000',
-                'city' => 'required|string|max:100',
                 'governorate' => 'required|string|max:100',
-                'price' => 'required|numeric|min:0',
+                'city' => 'required|string|max:100',
                 'number_of_rooms' => 'required|numeric|min:1',
+                'area' => 'required|numeric|min:0',
+                'price' => 'required|numeric|min:0',
                 'is_rented' => 'sometimes|boolean',
                 'images' => 'required|array|min:1',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
             ]);
+
+
             $apartment = Apartment::create([
                 'user_id' => Auth::id(), // accept only auth users
+                'title' => $request->title,
                 'address' => $request->address,
                 'description' => $request->description,
-                'city' => $request->city,
                 'governorate' => $request->governorate,
-                'price' => $request->price,
+                'city' => $request->city,
                 'number_of_rooms' => $request->number_of_rooms,
+                'area' => $request->area,
+                'price' => $request->price,
                 'is_rented' => $request->is_rented ?? false, // false is default
             ]);
             if ($request->hasFile('images')) {
@@ -54,7 +67,6 @@ class ApartmentController extends Controller
                     ]);
                 }
             }
-
             return response()->json(
                 [
                     'message' => 'Apartment created successfully',

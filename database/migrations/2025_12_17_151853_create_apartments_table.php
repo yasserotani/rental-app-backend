@@ -18,14 +18,17 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->string('title');
             $table->string('address');          // عنوان الشقة
             $table->text('description')->nullable();      // وصف الشقة
             $table->string('governorate');     // المحافظة
             $table->string('city');
             $table->integer('number_of_rooms');
+            $table->decimal('area', 8, 2);
             $table->decimal('price', 10, 2);   // السعر
             $table->boolean('is_rented')->default(false); // هل مؤجرة
-
+            $table->decimal('average_rating', 3, 2)->unsigned()->default(0);
+            $table->integer('reviews_count')->unsigned()->default(0);
             $table->timestamps();
         });
     }
