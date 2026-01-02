@@ -17,9 +17,12 @@ class Apartment extends Model
         'description',
         'city',
         'governorate',
-        'price',
         'number_of_rooms',
+        'area',
+        'price',
         'is_rented',
+        'average_rating',
+        'reviews_count',
     ];
 
     public function user()

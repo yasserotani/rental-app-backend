@@ -110,7 +110,7 @@ class BookingController extends Controller
         $startDate = Carbon::parse($booking->start_date);
         $endDate = Carbon::parse($booking->end_date);
 
-        //get all approved booking except this one
+        //get all future approved bookings except this one
         $allBookings = $booking->apartment->bookings()
             ->where('status', 'approved')
             ->where('id', '!=', $booking->id)
@@ -124,13 +124,13 @@ class BookingController extends Controller
             );
             if ($hasConflict) {
                 return response()->json([
-                    'message' => 'Cannot approve thisBooking. Dates conflict with an existing approved booking.',
-                    'conflicting_approvedBooking' => [
+                    'message' => 'Cannot approve this booking ,dates conflict with an existing approved booking.',
+                    'conflicting_booking' => [
                         'id' => $approvedBooking->id,
                         'start_date' => $approvedBooking->start_date,
                         'end_date' => $approvedBooking->end_date,
                     ]
-                ], 409);
+                ], 400);
             }
         }
 
@@ -218,6 +218,100 @@ class BookingController extends Controller
             ]
         ], 200);
     }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after:start_date'
+        ]);
+        $booking = Booking::with('apartment')->findOrFail($id);
+
+        // check if the user own the booking
+        if ($booking->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'the user did not make this booking!'
+            ], 400);
+        }
+        // only pending or approved booking can be updated
+        if ($booking->status !== 'pending' && $booking->status !== 'approved') {
+            return response()->json([
+                'message' => 'only pending or approved booking can be updated!'
+            ], 400);
+        }
+
+        // get the new dates
+        $newStartDate = Carbon::parse($request->start_date);
+        $newEndDate = Carbon::parse($request->end_date);
+
+        // check for conflict with existing future approved bookings
+        $allBookings = $booking->apartment->bookings()
+            ->where('status', 'approved')
+            ->where('end_date', '>=', now())
+            ->where('id', '!=', $booking->id)
+            ->get();
+
+        foreach ($allBookings as $approvedBooking) {
+            $hasConflict = (
+                $newStartDate < $approvedBooking->end_date &&
+                $approvedBooking->start_date < $newEndDate
+            );
+            if ($hasConflict) {
+                return response()->json([
+                    'message' => 'Cannot update this booking ,dates conflict with an existing approved booking.',
+                    'conflicting_booking' => [
+                        'id' => $approvedBooking->id,
+                        'start_date' => $approvedBooking->start_date,
+                        'end_date' => $approvedBooking->end_date,
+                    ]
+                ], 400);
+            }
+        }
+
+
+        // calculate the new total price
+        $days = $newStartDate->diffInDays($newEndDate) + 1;
+        $pricePerDay = $booking->apartment->price;
+        $totalPrice = $days * $pricePerDay;
+        // update the booking
+        $booking->update([
+            'start_date' => $newStartDate,
+            'end_date' => $newEndDate,
+            'total_price' => $totalPrice,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Booking updated successfully',
+            'booking' => [
+                'id' => $booking->id,
+                'start_date' => $booking->start_date,
+                'end_date' => $booking->end_date,
+                'status' => $booking->status,
+                'total_price' => $booking->total_price,
+            ]
+        ], 200);
+    }
+
+    // delete booking
+    public function delete($id)
+    {
+        $booking = Booking::with('apartment')->findOrFail($id);
+        if ($booking->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'you did not make this booking!'
+            ], 400);
+        }
+
+        $booking->delete();
+        return response()->json([
+            'message' => 'Booking deleted successfully',
+            'booking' => [
+                'id' => $booking->id,
+                'status' => $booking->status,
+            ]
+        ], 200);
+    }
+
     public function getAllUserBookings()
     {
 

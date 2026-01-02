@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Booking;
-use App\Models\Review;
+
 
 class UserController extends Controller
 {
@@ -172,51 +171,5 @@ class UserController extends Controller
             ]
         ]);
     }
-    public function review(Request $request, $apartment_id)
-    {
-        $validatedData = $request->validate([
-            'rating' => 'required|integer|between:1,5',
-            'comment' => 'nullable|string',
-        ]);
-
-        // Validate apartment exists
-        $apartment = \App\Models\Apartment::findOrFail($apartment_id);
-
-        $user = Auth::user();
-
-        // تحقق أن المستخدم لديه حجز Approved للشقة
-        $hasBooking = Booking::where('user_id', $user->id)
-            ->where('apartment_id', $apartment_id)
-            ->where('status', 'approved')
-            ->exists();
-
-        if (!$hasBooking) {
-            return response()->json([
-                'message' => 'You can only review apartments you have rented.'
-            ], 403);
-        }
-
-        // Check if user already reviewed this apartment
-        $existingReview = Review::where('user_id', $user->id)
-            ->where('apartment_id', $apartment_id)
-            ->exists();
-
-        if ($existingReview) {
-            return response()->json([
-                'message' => 'You have already reviewed this apartment.'
-            ], 409);
-        }
-
-        // إضافة user_id و apartment_id
-        $validatedData['user_id'] = $user->id;
-        $validatedData['apartment_id'] = $apartment_id;
-
-        // إنشاء التقييم
-        $review = Review::create($validatedData);
-
-        return response()->json([
-            'message' => 'Review submitted successfully',
-            'review' => $review
-        ], 201);
-    }
+  
 }

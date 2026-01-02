@@ -7,6 +7,7 @@ use App\Models\Apartment;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ApartmentController extends Controller
 {
@@ -83,6 +84,117 @@ class ApartmentController extends Controller
         }
     }
 
+    // update apartment data 
+    public function updateApartment(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'address' => 'sometimes|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'governorate' => 'sometimes|string|max:100',
+            'city' => 'sometimes|string|max:100',
+            'number_of_rooms' => 'sometimes|numeric|min:1',
+            'area' => 'sometimes|numeric|min:0',
+            'price' => 'sometimes|numeric|min:0',
+            'is_rented' => 'sometimes|boolean',
+        ]);
+        // check if the user own the apartment
+        $apartment = Apartment::findOrFail($id);
+        if ($apartment->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'you do not own this apartment!'
+            ], 400);
+        }
+        $apartment->update($request->only([
+            'title',
+            'address',
+            'description',
+            'governorate',
+            'city',
+            'number_of_rooms',
+            'area',
+            'price',
+            'is_rented',
+        ]));
+        return response()->json([
+            'message' => 'Apartment updated successfully',
+            'apartment' => new ApartmentResource($apartment)
+        ], 200);
+    }
+    // add image to apartment
+    public function addImages(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'images' => 'required|array|min:1',
+                'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
+            ]);
+            $apartment = Apartment::findOrFail($id);
+            // check if the user own the apartment
+            if ($apartment->user_id !== Auth::id()) {
+                return response()->json([
+                    'message' => 'you do not own this apartment!'
+                ], 400);
+            }
+            // store the images 
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('apartment_images', 'public');
+                    $apartment->images()->create([
+                        'image_path' => $path,
+                    ]);
+                }
+            }
+            return response()->json([
+                'message' => 'Images added successfully',
+                'images' => $apartment->images,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'image add failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    // delete images 
+    public function deleteImages(Request $request, $id)
+    {
+        $request->validate([
+            'image_ids' => 'required|array|min:1',
+            'image_ids.*' => 'integer|exists:apartment_images,id',
+        ]);
+
+        $apartment = Apartment::findOrFail($id);
+
+        if ($apartment->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'You do not own this apartment!'
+            ], 403);
+        }
+
+        $images = $apartment->images()
+            ->whereIn('id', $request->image_ids)
+            ->get();
+
+        if ($images->isEmpty()) {
+            return response()->json([
+                'message' => 'No images found'
+            ], 404);
+        }
+
+        foreach ($images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+            $image->delete();
+        }
+
+        return response()->json([
+            'message' => 'Images deleted successfully',
+            'deleted_count' => $images->count()
+        ], 200);
+    }
+
+    // get all user apartments
     public function getUserApartments(Request $request)
     {
         $request->validate([
