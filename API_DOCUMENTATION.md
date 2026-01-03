@@ -28,7 +28,8 @@ Authorization: Bearer {admin_token}
 2. [Apartments](#apartments)
 3. [Bookings](#bookings)
 4. [Reviews](#reviews)
-5. [Admin](#admin)
+5. [Favorites](#favorites)
+6. [Admin](#admin)
 
 ---
 
@@ -242,27 +243,39 @@ Get a list of all apartments with their images.
 ```json
 {
   "message": "get apartments success",
-  "apartments": [
+  "data": [
     {
       "id": 1,
+      "user_id": 1,
+      "title": "Beautiful Apartment",
       "address": "123 Main St",
       "description": "Beautiful apartment",
       "city": "Damascus",
       "governorate": "Damascus",
-      "price": 100.00,
       "number_of_rooms": 3,
+      "area": 80.50,
+      "price": 100.00,
       "is_rented": false,
+      "average_rating": 4.5,
+      "reviews_count": 10,
       "images": [
         {
           "id": 1,
           "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
         }
       ],
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
+      "created_at": "2025-01-01 12:00:00",
+      "updated_at": "2025-01-01"
     }
   ],
-  "count": 10
+  "pagination": {
+    "current_page": 1,
+    "last_page": 5,
+    "per_page": 10,
+    "total": 50,
+    "next_page_url": "http://your-domain.com/api/apartments?page=2",
+    "prev_page_url": null
+  }
 }
 ```
 
@@ -335,11 +348,184 @@ Create a new apartment listing. Only authenticated users can create apartments.
 
 ---
 
-### 3. Search Apartments
+### 3. Update Apartment
+
+Update apartment details. Only the apartment owner can update.
+
+**Endpoint:** `PUT /api/apartments/{id}`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `id`: Apartment ID
+
+**Request Body:**
+```json
+{
+  "title": "Updated Apartment Title",
+  "address": "456 New Street",
+  "description": "Updated description",
+  "governorate": "Damascus",
+  "city": "Damascus",
+  "number_of_rooms": 4,
+  "area": 120.50,
+  "price": 150.00,
+  "is_rented": false
+}
+```
+
+**Validation Rules:**
+- All fields are optional (use `sometimes` validation)
+- `title`: string, max:255
+- `address`: string, max:255
+- `description`: nullable, string, max:1000
+- `governorate`: string, max:100
+- `city`: string, max:100
+- `number_of_rooms`: numeric, min:1
+- `area`: numeric, min:0
+- `price`: numeric, min:0
+- `is_rented`: boolean
+
+**Success Response (200):**
+```json
+{
+  "message": "Apartment updated successfully",
+  "apartment": {
+    "id": 1,
+    "title": "Updated Apartment Title",
+    "address": "456 New Street",
+    "description": "Updated description",
+    "governorate": "Damascus",
+    "city": "Damascus",
+    "number_of_rooms": 4,
+    "area": 120.50,
+    "price": 150.00,
+    "is_rented": false,
+    "images": [...]
+  }
+}
+```
+
+**Error Responses:**
+- **400** - Not the owner:
+```json
+{
+  "message": "you do not own this apartment!"
+}
+```
+
+- **404** - Apartment not found
+
+---
+
+### 4. Add Images to Apartment
+
+Add one or more images to an apartment. Only the apartment owner can add images.
+
+**Endpoint:** `POST /api/apartments/{id}/images`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `id`: Apartment ID
+
+**Request Body (multipart/form-data):**
+```
+images[]: file (image: jpg,jpeg,png,webp, max:4MB)
+images[]: file (image: jpg,jpeg,png,webp, max:4MB)
+...
+```
+
+**Validation Rules:**
+- `images`: required, array, min:1
+- `images.*`: image, mimes:jpg,jpeg,png,webp, max:4096KB
+
+**Success Response (200):**
+```json
+{
+  "message": "Images added successfully",
+  "images": [
+    {
+      "id": 5,
+      "apartment_id": 1,
+      "image_path": "apartment_images/xxx.jpg",
+      "created_at": "2025-01-01T00:00:00.000000Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- **400** - Not the owner:
+```json
+{
+  "message": "you do not own this apartment!"
+}
+```
+
+- **500** - Upload failed:
+```json
+{
+  "status": "error",
+  "message": "image add failed",
+  "error": "Error message"
+}
+```
+
+---
+
+### 5. Delete Images from Apartment
+
+Delete specific images from an apartment. Only the apartment owner can delete images.
+
+**Endpoint:** `DELETE /api/apartments/{id}/images`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `id`: Apartment ID
+
+**Request Body:**
+```json
+{
+  "image_ids": [1, 2, 3]
+}
+```
+
+**Validation Rules:**
+- `image_ids`: required, array, min:1
+- `image_ids.*`: integer, must exist in apartment_images table
+
+**Success Response (200):**
+```json
+{
+  "message": "Images deleted successfully",
+  "deleted_count": 3
+}
+```
+
+**Error Responses:**
+- **400** - Not the owner:
+```json
+{
+  "message": "You do not own this apartment!"
+}
+```
+
+- **404** - Images not found:
+```json
+{
+  "message": "No images found"
+}
+```
+
+---
+
+### 6. Search Apartments
 
 Search apartments with filters. Returns paginated results (10 per page).
 
-**Endpoint:** `GET /api/apartments`
+**Endpoint:** `GET /api/apartments/search`
 
 **Authentication:** Required (Bearer token)
 
@@ -354,7 +540,7 @@ Search apartments with filters. Returns paginated results (10 per page).
 
 **Example Request:**
 ```
-GET /api/apartments?governorate=Damascus&min_price=50&max_price=200&min_rooms=2&page=1
+GET /api/apartments/search?governorate=Damascus&min_price=50&max_price=200&min_rooms=2&page=1
 ```
 
 **Success Response (200):**
@@ -375,16 +561,110 @@ GET /api/apartments?governorate=Damascus&min_price=50&max_price=200&min_rooms=2&
       "updated_at": "2025-01-01T00:00:00.000000Z"
     }
   ],
-  "first_page_url": "http://your-domain.com/api/apartments?page=1",
+  "first_page_url": "http://your-domain.com/api/apartments/search?page=1",
   "from": 1,
   "last_page": 5,
-  "last_page_url": "http://your-domain.com/api/apartments?page=5",
-  "next_page_url": "http://your-domain.com/api/apartments?page=2",
-  "path": "http://your-domain.com/api/apartments",
+  "last_page_url": "http://your-domain.com/api/apartments/search?page=5",
+  "next_page_url": "http://your-domain.com/api/apartments/search?page=2",
+  "path": "http://your-domain.com/api/apartments/search",
   "per_page": 10,
   "prev_page_url": null,
   "to": 10,
   "total": 50
+}
+```
+
+---
+
+### 7. Get User Apartments
+
+Get all apartments owned by a specific user.
+
+**Endpoint:** `GET /api/user_apartments`
+
+**Authentication:** Not required
+
+**Query Parameters:**
+- `user_id` (required): The ID of the user
+
+**Example Request:**
+```
+GET /api/user_apartments?user_id=1
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "User apartments retrieved successfully",
+  "apartments": [
+    {
+      "id": 1,
+      "address": "123 Main St",
+      "description": "Beautiful apartment",
+      "city": "Damascus",
+      "governorate": "Damascus",
+      "price": 100.00,
+      "number_of_rooms": 3,
+      "is_rented": false,
+      "images": [
+        {
+          "id": 1,
+          "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
+        }
+      ],
+      "created_at": "2025-01-01T00:00:00.000000Z",
+      "updated_at": "2025-01-01T00:00:00.000000Z"
+    }
+  ],
+  "count": 5
+}
+```
+
+---
+
+### 8. Get Apartment Bookings
+
+Get all future bookings for a specific apartment. Only the apartment owner can access this.
+
+**Endpoint:** `GET /api/apartment_bookings/{id}`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `id`: Apartment ID
+
+**Success Response (200):**
+```json
+{
+  "message": "Bookings retrieved successfully",
+  "bookings": [
+    {
+      "id": 1,
+      "user_id": 2,
+      "apartment_id": 1,
+      "start_date": "2025-02-01",
+      "end_date": "2025-02-05",
+      "status": "approved",
+      "total_price": "400.00",
+      "created_at": "2025-01-01T00:00:00.000000Z",
+      "updated_at": "2025-01-01T00:00:00.000000Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- **403** - Not the owner:
+```json
+{
+  "message": "You do not own this apartment!"
+}
+```
+
+- **404** - No bookings found:
+```json
+{
+  "message": "No bookings found!"
 }
 ```
 
@@ -686,38 +966,120 @@ Cancel a booking. Only the user who made the booking can cancel it. Can only can
 
 ---
 
-### 5. Get User Bookings
+### 5. Update Booking
 
-Get all bookings for the authenticated user.
+Update/modify a booking. Only the user who made the booking can update it. Booking status will change to `pending` and requires owner approval.
+
+**Endpoint:** `PUT /api/bookings/{id}/update`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `id`: Booking ID
+
+**Request Body:**
+```json
+{
+  "start_date": "2025-02-15",
+  "end_date": "2025-02-20"
+}
+```
+
+**Validation Rules:**
+- `start_date`: required, date, must be today or later
+- `end_date`: required, date, must be after start_date
+
+**Success Response (200):**
+```json
+{
+  "message": "Booking updated successfully",
+  "booking": {
+    "id": 1,
+    "start_date": "2025-02-15",
+    "end_date": "2025-02-20",
+    "status": "pending",
+    "total_price": 750.00
+  }
+}
+```
+
+**Error Responses:**
+- **400** - Not the booking owner:
+```json
+{
+  "message": "the user did not make this booking!"
+}
+```
+
+- **400** - Cannot update:
+```json
+{
+  "message": "only pending or approved booking can be updated!"
+}
+```
+
+- **400** - Date conflict:
+```json
+{
+  "message": "Cannot update this booking ,dates conflict with an existing approved booking.",
+  "conflicting_booking": {
+    "id": 2,
+    "start_date": "2025-02-16",
+    "end_date": "2025-02-18"
+  }
+}
+```
+
+---
+
+### 6. Get User Bookings
+
+Get all bookings for the authenticated user (past, current, and cancelled). Returns paginated results (10 per page).
 
 **Endpoint:** `GET /api/bookings/user_bookings`
 
 **Authentication:** Required (Bearer token)
 
+**Query Parameters:**
+- `page` (optional): Page number for pagination
+
 **Success Response (200):**
 ```json
 {
   "message": "getting user bookings success",
-  "data": [
-    {
-      "id": 1,
-      "user_id": 1,
-      "apartment_id": 1,
-      "start_date": "2025-02-01",
-      "end_date": "2025-02-05",
-      "status": "approved",
-      "total_price": "400.00",
-      "apartment": {
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
         "id": 1,
-        "address": "123 Main St",
-        "city": "Damascus",
-        "governorate": "Damascus",
-        "price": 100.00
-      },
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
-    }
-  ]
+        "user_id": 1,
+        "apartment_id": 1,
+        "start_date": "2025-02-01",
+        "end_date": "2025-02-05",
+        "status": "approved",
+        "total_price": "400.00",
+        "apartment": {
+          "id": 1,
+          "address": "123 Main St",
+          "city": "Damascus",
+          "governorate": "Damascus",
+          "price": 100.00
+        },
+        "created_at": "2025-01-01T00:00:00.000000Z",
+        "updated_at": "2025-01-01T00:00:00.000000Z"
+      }
+    ],
+    "per_page": 10,
+    "total": 5
+  }
+}
+```
+
+**Empty Response (200):**
+```json
+{
+  "message": "No Bookings found",
+  "Bookings": []
 }
 ```
 
@@ -776,6 +1138,100 @@ Create a review for an apartment. User must have an approved booking for the apa
 ```json
 {
   "message": "You have already reviewed this apartment."
+}
+```
+
+---
+
+## Favorites
+
+### 1. Toggle Favorite
+
+Add or remove an apartment from favorites. If the apartment is already in favorites, it will be removed. Otherwise, it will be added.
+
+**Endpoint:** `POST /api/favorites/{apartmentId}/toggle`
+
+**Authentication:** Required (Bearer token)
+
+**URL Parameters:**
+- `apartmentId`: Apartment ID
+
+**Success Response (201) - Added:**
+```json
+{
+  "message": "favorite added successfully",
+  "data": {
+    "id": 1,
+    "user_id": 1,
+    "apartment_id": 1,
+    "created_at": "2025-01-01T00:00:00.000000Z"
+  }
+}
+```
+
+**Success Response (200) - Removed:**
+```json
+{
+  "status": "removed",
+  "message": "Removed from favorites"
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "message": "Apartment not found"
+}
+```
+
+---
+
+### 2. Get All User Favorites
+
+Get all favorite apartments for the authenticated user. Returns paginated results (10 per page).
+
+**Endpoint:** `GET /api/favorites`
+
+**Authentication:** Required (Bearer token)
+
+**Query Parameters:**
+- `page` (optional): Page number for pagination
+
+**Success Response (200):**
+```json
+{
+  "message": "favorites get it successfully",
+  "favorites": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "apartment_id": 1,
+        "apartment": {
+          "id": 1,
+          "title": "Beautiful Apartment",
+          "address": "123 Main St",
+          "city": "Damascus",
+          "governorate": "Damascus",
+          "price": 100.00,
+          "number_of_rooms": 3,
+          "images": [...]
+        },
+        "created_at": "2025-01-01T00:00:00.000000Z"
+      }
+    ],
+    "per_page": 10,
+    "total": 5
+  }
+}
+```
+
+**Empty Response (200):**
+```json
+{
+  "message": "no favorites found",
+  "favorites": []
 }
 ```
 
@@ -1059,55 +1515,114 @@ Delete a user account.
 
 ---
 
-## Example cURL Requests
+## Flutter Integration Notes
 
-### Register User
-```bash
-curl -X POST http://your-domain.com/api/register \
-  -F "first_name=John" \
-  -F "last_name=Doe" \
-  -F "phone=1234567890" \
-  -F "birth_date=1990-01-01" \
-  -F "profile_image=@/path/to/image.jpg" \
-  -F "id_card_image=@/path/to/id.jpg" \
-  -F "password=password123" \
-  -F "password_confirmation=password123"
+### HTTP Client Setup
+
+Use `http` or `dio` package for making API requests:
+
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+// Base URL
+const String baseUrl = 'http://your-domain.com/api';
+
+// Headers helper
+Map<String, String> getHeaders({String? token}) {
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  
+  if (token != null) {
+    headers['Authorization'] = 'Bearer $token';
+  }
+  
+  return headers;
+}
 ```
 
-### Login
-```bash
-curl -X POST http://your-domain.com/api/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "1234567890",
-    "password": "password123"
-  }'
+### Multipart Requests (File Uploads)
+
+For file uploads (register, create apartment, add images), use `http.MultipartRequest`:
+
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:io';
+
+Future<void> uploadImage(String token, int apartmentId, File imageFile) async {
+  var request = http.MultipartRequest(
+    'POST',
+    Uri.parse('$baseUrl/apartments/$apartmentId/images'),
+  );
+  
+  request.headers['Authorization'] = 'Bearer $token';
+  request.files.add(
+    await http.MultipartFile.fromPath('images[]', imageFile.path),
+  );
+  
+  var response = await request.send();
+  var responseData = await response.stream.bytesToString();
+  print(responseData);
+}
 ```
 
-### Create Apartment (with token)
-```bash
-curl -X POST http://your-domain.com/api/create_apartment \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -F "address=123 Main St" \
-  -F "description=Beautiful apartment" \
-  -F "city=Damascus" \
-  -F "governorate=Damascus" \
-  -F "price=100" \
-  -F "number_of_rooms=3" \
-  -F "images[]=@/path/to/image1.jpg" \
-  -F "images[]=@/path/to/image2.jpg"
+### Error Handling
+
+Always check status codes and handle errors:
+
+```dart
+if (response.statusCode == 200 || response.statusCode == 201) {
+  // Success
+  var data = json.decode(response.body);
+} else if (response.statusCode == 401) {
+  // Unauthorized - token expired or invalid
+  // Redirect to login
+} else if (response.statusCode == 400) {
+  // Bad request - validation errors
+  var error = json.decode(response.body);
+  print(error['message']);
+} else {
+  // Other errors
+  print('Error: ${response.statusCode}');
+}
 ```
 
-### Create Booking
-```bash
-curl -X POST http://your-domain.com/api/bookings \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "apartment_id": 1,
-    "start_date": "2025-02-01",
-    "end_date": "2025-02-05"
-  }'
+### Token Storage
+
+Store authentication token securely using `shared_preferences` or `flutter_secure_storage`:
+
+```dart
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Save token
+Future<void> saveToken(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('auth_token', token);
+}
+
+// Get token
+Future<String?> getToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('auth_token');
+}
+
+// Remove token (logout)
+Future<void> removeToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('auth_token');
+}
+```
+
+### Date Format
+
+All dates should be in `YYYY-MM-DD` format:
+
+```dart
+String formatDate(DateTime date) {
+  return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+}
 ```
 
 ---
