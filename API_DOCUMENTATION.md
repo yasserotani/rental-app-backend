@@ -233,11 +233,11 @@ Get the authenticated user's information.
 
 ### 1. Get All Apartments
 
-Get a list of all apartments with their images.
+Get a list of all apartments with their images. Returns paginated results (10 per page).
 
 **Endpoint:** `GET /api/apartments`
 
-**Authentication:** Not required
+**Authentication:** Required (Bearer token)
 
 **Success Response (200):**
 ```json
@@ -246,19 +246,19 @@ Get a list of all apartments with their images.
   "data": [
     {
       "id": 1,
-      "user_id": 1,
+      "userId": 1,
       "title": "Beautiful Apartment",
       "address": "123 Main St",
       "description": "Beautiful apartment",
       "city": "Damascus",
       "governorate": "Damascus",
-      "number_of_rooms": 3,
+      "rooms": 3,
       "area": 80.50,
       "price": 100.00,
-      "is_rented": false,
+      "isRented": false,
       "average_rating": 4.5,
       "reviews_count": 10,
-      "images": [
+      "imageUrls": [
         {
           "id": 1,
           "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
@@ -285,7 +285,7 @@ Get a list of all apartments with their images.
 
 Create a new apartment listing. Only authenticated users can create apartments.
 
-**Endpoint:** `POST /api/create_apartment`
+**Endpoint:** `POST /api/apartment`
 
 **Authentication:** Required (Bearer token)
 
@@ -367,10 +367,10 @@ Update apartment details. Only the apartment owner can update.
   "description": "Updated description",
   "governorate": "Damascus",
   "city": "Damascus",
-  "number_of_rooms": 4,
+  "rooms": 4,
   "area": 120.50,
   "price": 150.00,
-  "is_rented": false
+  "isRented": false
 }
 ```
 
@@ -397,11 +397,11 @@ Update apartment details. Only the apartment owner can update.
     "description": "Updated description",
     "governorate": "Damascus",
     "city": "Damascus",
-    "number_of_rooms": 4,
+    "rooms": 4,
     "area": 120.50,
     "price": 150.00,
-    "is_rented": false,
-    "images": [...]
+    "isRented": false,
+    "imageUrls": [...]
   }
 }
 ```
@@ -523,7 +523,7 @@ Delete specific images from an apartment. Only the apartment owner can delete im
 
 ### 6. Search Apartments
 
-Search apartments with filters. Returns paginated results (10 per page).
+Search apartments with filters. Returns paginated results (10 per page) with images included.
 
 **Endpoint:** `GET /api/apartments/search`
 
@@ -546,51 +546,52 @@ GET /api/apartments/search?governorate=Damascus&min_price=50&max_price=200&min_r
 **Success Response (200):**
 ```json
 {
-  "current_page": 1,
+  "message": "Search completed successfully",
   "data": [
     {
       "id": 1,
+      "userId": 1,
+      "title": "Beautiful Apartment",
       "address": "123 Main St",
       "description": "Beautiful apartment",
       "city": "Damascus",
       "governorate": "Damascus",
+      "rooms": 3,
+      "area": 80.50,
       "price": 100.00,
-      "number_of_rooms": 3,
-      "is_rented": false,
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
+      "isRented": false,
+      "average_rating": 4.5,
+      "reviews_count": 10,
+      "imageUrls": [
+        {
+          "id": 1,
+          "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
+        }
+      ],
+      "created_at": "2025-01-01 12:00:00",
+      "updated_at": "2025-01-01"
     }
   ],
-  "first_page_url": "http://your-domain.com/api/apartments/search?page=1",
-  "from": 1,
-  "last_page": 5,
-  "last_page_url": "http://your-domain.com/api/apartments/search?page=5",
-  "next_page_url": "http://your-domain.com/api/apartments/search?page=2",
-  "path": "http://your-domain.com/api/apartments/search",
-  "per_page": 10,
-  "prev_page_url": null,
-  "to": 10,
-  "total": 50
+  "pagination": {
+    "current_page": 1,
+    "last_page": 5,
+    "per_page": 10,
+    "total": 50,
+    "next_page_url": "http://your-domain.com/api/apartments/search?page=2",
+    "prev_page_url": null
+  }
 }
 ```
 
 ---
 
-### 7. Get User Apartments
+### 7. Get My Apartments
 
-Get all apartments owned by a specific user.
+Get all apartments owned by the authenticated user.
 
-**Endpoint:** `GET /api/user_apartments`
+**Endpoint:** `GET /api/my_apartments`
 
-**Authentication:** Not required
-
-**Query Parameters:**
-- `user_id` (required): The ID of the user
-
-**Example Request:**
-```
-GET /api/user_apartments?user_id=1
-```
+**Authentication:** Required (Bearer token)
 
 **Success Response (200):**
 ```json
@@ -599,21 +600,26 @@ GET /api/user_apartments?user_id=1
   "apartments": [
     {
       "id": 1,
+      "userId": 1,
+      "title": "Beautiful Apartment",
       "address": "123 Main St",
       "description": "Beautiful apartment",
       "city": "Damascus",
       "governorate": "Damascus",
+      "rooms": 3,
+      "area": 80.50,
       "price": 100.00,
-      "number_of_rooms": 3,
-      "is_rented": false,
-      "images": [
+      "isRented": false,
+      "average_rating": 4.5,
+      "reviews_count": 10,
+      "imageUrls": [
         {
           "id": 1,
           "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
         }
       ],
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
+      "created_at": "2025-01-01 12:00:00",
+      "updated_at": "2025-01-01"
     }
   ],
   "count": 5
@@ -624,7 +630,7 @@ GET /api/user_apartments?user_id=1
 
 ### 8. Get Apartment Bookings
 
-Get all future bookings for a specific apartment. Only the apartment owner can access this.
+Get all bookings (past, current, and future) for a specific apartment. Only the apartment owner can access this.
 
 **Endpoint:** `GET /api/apartment_bookings/{id}`
 
@@ -665,52 +671,6 @@ Get all future bookings for a specific apartment. Only the apartment owner can a
 ```json
 {
   "message": "No bookings found!"
-}
-```
-
----
-
-### 4. Get User Apartments
-
-Get all apartments owned by a specific user.
-
-**Endpoint:** `GET /api/user_apartments`
-
-**Authentication:** Not required
-
-**Query Parameters:**
-- `user_id` (required): The ID of the user
-
-**Example Request:**
-```
-GET /api/user_apartments?user_id=1
-```
-
-**Success Response (200):**
-```json
-{
-  "message": "User apartments retrieved successfully",
-  "apartments": [
-    {
-      "id": 1,
-      "address": "123 Main St",
-      "description": "Beautiful apartment",
-      "city": "Damascus",
-      "governorate": "Damascus",
-      "price": 100.00,
-      "number_of_rooms": 3,
-      "is_rented": false,
-      "images": [
-        {
-          "id": 1,
-          "image_url": "http://your-domain.com/storage/apartment_images/xxx.jpg"
-        }
-      ],
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
-    }
-  ],
-  "count": 5
 }
 ```
 
@@ -718,7 +678,7 @@ GET /api/user_apartments?user_id=1
 
 ### 5. Get Apartment Bookings
 
-Get all future bookings for a specific apartment. Only the apartment owner can access this.
+Get all bookings (past, current, and future) for a specific apartment. Only the apartment owner can access this.
 
 **Endpoint:** `GET /api/apartment_bookings/{id}`
 
@@ -761,6 +721,44 @@ Get all future bookings for a specific apartment. Only the apartment owner can a
   "message": "No bookings found!"
 }
 ```
+
+---
+
+### 6. Delete Apartment
+
+Delete an apartment and all its associated images. Only the apartment owner can delete their apartment.
+
+**Endpoint:** `DELETE /api/apartment`
+
+**Authentication:** Required (Bearer token)
+
+**Query Parameters:**
+- `id` (required): Apartment ID
+
+**Example Request:**
+```
+DELETE /api/apartment?id=1
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "apartment deleted successfully",
+  "apartment_id": 1
+}
+```
+
+**Error Responses:**
+- **403** - Not the owner:
+```json
+{
+  "message": "you do not own this apartment!"
+}
+```
+
+- **404** - Apartment not found
+
+**Note:** This will also delete all associated images from storage and all related bookings, reviews, and favorites.
 
 ---
 

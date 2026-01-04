@@ -195,13 +195,10 @@ class ApartmentController extends Controller
     }
 
     // get all user apartments
-    public function getUserApartments(Request $request)
+    public function getUserApartments()
     {
-        $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
-        ]);
-
-        $apartments = Apartment::where('user_id', $request->user_id)
+        $userID = Auth::id();
+        $apartments = Apartment::where('user_id', $userID)
             ->with('images')
             ->get();
 
@@ -223,7 +220,7 @@ class ApartmentController extends Controller
             ], 403);
         }
 
-        $bookings = $apartment->bookings()->where('end_date', '>=', now())->get();
+        $bookings = $apartment->bookings()->get();
 
         if ($bookings->isEmpty()) {
             return response()->json([
@@ -238,7 +235,7 @@ class ApartmentController extends Controller
     }
     public function search(Request $request)
     {
-        $query = Apartment::query();
+        $query = Apartment::with('images');
 
         if ($request->filled('governorate')) {
             $query->where('governorate', $request->governorate);
@@ -263,7 +260,39 @@ class ApartmentController extends Controller
         }
         $apartments = $query->paginate(10);
 
-        return response()->json($apartments);
+        return response()->json([
+            'message' => 'Search results',
+            'data' => ApartmentResource::collection($apartments),
+            'pagination' => [
+                'current_page' => $apartments->currentPage(),
+                'last_page' => $apartments->lastPage(),
+            ]
+        ]);
+    }
+    // delete apartment 
+
+    public function delete($id)
+    {
+        $apartment = Apartment::with('images')->with('bookings')->findOrFail($id);
+
+        if ($apartment->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'you do not own this apartment!'
+            ], 403);
+        }
+
+        // Store ID before deletion
+        $apartmentId = $apartment->id;
+
+        foreach ($apartment->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+        $apartment->delete();
+
+        return response()->json([
+            'message' => 'apartment deleted successfully',
+            'apartment_id' => $apartmentId
+        ], 200);
     }
 
     ///

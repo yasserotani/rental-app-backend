@@ -13,7 +13,6 @@ Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('check_phone_availability', [UserController::class, 'checkAvailableNumber']);
 
-Route::get('apartments', [ApartmentController::class, 'getAllApartments']);
 
 // api that need auth
 Route::middleware('auth:sanctum')->group(function () {
@@ -21,13 +20,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('self', [UserController::class, 'getUser']);
 
     // apartment
-    Route::post('create_apartment', [ApartmentController::class, 'createApartments']);
+    Route::get('apartments', [ApartmentController::class, 'getAllApartments']);
+    Route::get('my_apartments', [ApartmentController::class, 'getUserApartments']);
+    Route::post('apartment', [ApartmentController::class, 'createApartments']);
     Route::put('/apartments/{id}', [ApartmentController::class, 'updateApartment']);
     Route::post('/apartments/{id}/images', [ApartmentController::class, 'addImages']);
     Route::delete('/apartments/{id}/images', [ApartmentController::class, 'deleteImages']);
     Route::get('apartment_bookings/{id}', [ApartmentController::class, 'getAllApartmentBookings']);
     Route::get('/apartments/search', [ApartmentController::class, 'search']);
-
+    Route::delete('apartment', [ApartmentController::class, 'delete']);
     // Booking 
     Route::post('/bookings', [BookingController::class, 'createBook']);
     Route::put('/bookings/{id}/update', [BookingController::class, 'update']);
@@ -56,6 +57,5 @@ Route::middleware(['auth:admin', 'abilities:admin'])->group(function () {
     Route::get('pending_users', [AdminController::class, 'getAllPendingsUsers']);
 });
 
-Route::get('user_apartments', [ApartmentController::class, 'getUserApartments']);
 
 //2|kPGTzy2XWr4Vfm7ZGVrhU3m8M3XKsVlJfc341D9y970f7cfd

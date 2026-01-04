@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+
 
 return new class extends Migration {
     /**
@@ -10,11 +12,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        $defaultProfileImage = collect(Storage::disk('public')->files('profile_images'));
+
+        Schema::create('users', function (Blueprint $table) use ($defaultProfileImage) {
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('profile_image');
+            $table->string('profile_image')->default($defaultProfileImage->random());
             $table->string('id_card_image');
             $table->string('phone')->unique();
             $table->date('birth_date');
