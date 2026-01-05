@@ -13,10 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Sanctum ability aliases
-        $middleware->alias([
-            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
-            'ability'   => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
-        ]);
+    $middleware->alias([
+        'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+        'ability'   => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+    ]);
 
         // For API requests, do not redirect unauthenticated users to a "login" route.
         // Returning null here lets Laravel/Sanctum respond with a 401 JSON error instead.
@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // Since this is API-only, return null for all cases
             return null;
         });
-    })
+})
     ->withExceptions(function (Exceptions $exceptions): void {
         // Ensure API routes always return JSON, even without Accept header
         $exceptions->shouldRenderJsonWhen(function ($request, \Throwable $e) {

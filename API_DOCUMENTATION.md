@@ -1093,6 +1093,60 @@ Get all bookings for the authenticated user (past, current, and cancelled). Retu
 
 ---
 
+### 7. Get Owner Bookings
+
+Get all bookings for all apartments owned by the authenticated user. Returns paginated results (10 per page) with apartment details included.
+
+**Endpoint:** `GET /api/bookings/owner`
+
+**Authentication:** Required (Bearer token)
+
+**Query Parameters:**
+- `page` (optional): Page number for pagination
+
+**Success Response (200):**
+```json
+{
+  "message": "getting owner bookings success",
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 1,
+        "user_id": 2,
+        "apartment_id": 1,
+        "start_date": "2025-02-01",
+        "end_date": "2025-02-05",
+        "status": "approved",
+        "total_price": "400.00",
+        "apartment": {
+          "id": 1,
+          "title": "Beautiful Apartment",
+          "address": "123 Main St",
+          "city": "Damascus",
+          "governorate": "Damascus",
+          "price": 100.00
+        },
+        "created_at": "2025-01-01T00:00:00.000000Z",
+        "updated_at": "2025-01-01T00:00:00.000000Z"
+      }
+    ],
+    "per_page": 10,
+    "total": 5
+  }
+}
+```
+
+**Empty Response (200):**
+```json
+{
+  "message": "No Bookings found",
+  "Bookings": []
+}
+```
+
+---
+
 ## Reviews
 
 ### 1. Create Review
