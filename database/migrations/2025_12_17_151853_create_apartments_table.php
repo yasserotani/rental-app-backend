@@ -26,7 +26,7 @@ return new class extends Migration {
             $table->integer('number_of_rooms');
             $table->decimal('area', 8, 2);
             $table->decimal('price', 10, 2);   // السعر
-            $table->boolean('is_rented')->default(false); // هل مؤجرة
+            $table->boolean('is_rented')->default(false)->nullable(); // هل مؤجرة
             $table->decimal('average_rating', 3, 2)->unsigned()->default(0);
             $table->integer('reviews_count')->unsigned()->default(0);
             $table->timestamps();

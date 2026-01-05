@@ -74,7 +74,7 @@ class UserController extends Controller
         $request->validate([
             'phone' => 'required'
         ]);
-
+        
         if (User::where('phone', $request->phone)->exists()) {
             return response()->json([
                 'message' => 'Phone number already used'

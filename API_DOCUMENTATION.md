@@ -292,12 +292,14 @@ Create a new apartment listing. Only authenticated users can create apartments.
 **Request Body (multipart/form-data):**
 ```json
 {
+  "title": "Beautiful Apartment",
   "address": "123 Main St",
   "description": "Beautiful apartment in the city center",
-  "city": "Damascus",
   "governorate": "Damascus",
-  "price": 100.00,
+  "city": "Damascus",
   "number_of_rooms": 3,
+  "area": 80.50,
+  "price": 100.00,
   "is_rented": false,
   "images": [
     "file1 (image: jpg,jpeg,png,webp, max:4MB)",
@@ -307,12 +309,14 @@ Create a new apartment listing. Only authenticated users can create apartments.
 ```
 
 **Validation Rules:**
+- `title`: required, string, max:255
 - `address`: required, string, max:255
 - `description`: nullable, string, max:1000
-- `city`: required, string, max:100
 - `governorate`: required, string, max:100
-- `price`: required, numeric, min:0
+- `city`: required, string, max:100
 - `number_of_rooms`: required, numeric, min:1
+- `area`: required, numeric, min:0
+- `price`: required, numeric, min:0
 - `is_rented`: optional, boolean (default: false)
 - `images`: required, array, min:1 image
 - `images.*`: image, mimes:jpg,jpeg,png,webp, max:4096KB
@@ -546,7 +550,7 @@ GET /api/apartments/search?governorate=Damascus&min_price=50&max_price=200&min_r
 **Success Response (200):**
 ```json
 {
-  "message": "Search completed successfully",
+  "message": "Search results",
   "data": [
     {
       "id": 1,
@@ -628,7 +632,7 @@ Get all apartments owned by the authenticated user.
 
 ---
 
-### 8. Get Apartment Bookings
+### 8. Get Apartment Bookings (single apartment)
 
 Get all bookings (past, current, and future) for a specific apartment. Only the apartment owner can access this.
 
@@ -676,49 +680,55 @@ Get all bookings (past, current, and future) for a specific apartment. Only the 
 
 ---
 
-### 5. Get Apartment Bookings
+### 9. Get Owner Bookings (all owned apartments)
 
-Get all bookings (past, current, and future) for a specific apartment. Only the apartment owner can access this.
+Get all bookings (past, current, and future) for **all apartments owned by the authenticated user**. Returns paginated results (10 per page).
 
-**Endpoint:** `GET /api/apartment_bookings/{id}`
+**Endpoint:** `GET /api/bookings/owner`
 
 **Authentication:** Required (Bearer token)
 
-**URL Parameters:**
-- `id`: Apartment ID
+**Query Parameters:**
+- `page` (optional): Page number for pagination
 
 **Success Response (200):**
 ```json
 {
-  "message": "Bookings retrieved successfully",
-  "bookings": [
-    {
-      "id": 1,
-      "user_id": 2,
-      "apartment_id": 1,
-      "start_date": "2025-02-01",
-      "end_date": "2025-02-05",
-      "status": "approved",
-      "total_price": "400.00",
-      "created_at": "2025-01-01T00:00:00.000000Z",
-      "updated_at": "2025-01-01T00:00:00.000000Z"
-    }
-  ]
+  "message": "getting owner bookings success",
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 1,
+        "user_id": 2,
+        "apartment_id": 1,
+        "start_date": "2025-02-01",
+        "end_date": "2025-02-05",
+        "status": "approved",
+        "total_price": "400.00",
+        "apartment": {
+          "id": 1,
+          "title": "Beautiful Apartment",
+          "address": "123 Main St",
+          "city": "Damascus",
+          "governorate": "Damascus",
+          "price": 100.00
+        },
+        "created_at": "2025-01-01T00:00:00.000000Z",
+        "updated_at": "2025-01-01T00:00:00.000000Z"
+      }
+    ],
+    "per_page": 10,
+    "total": 5
+  }
 }
 ```
 
-**Error Responses:**
-- **403** - Not the owner:
+**Empty Response (200):**
 ```json
 {
-  "message": "You do not own this apartment!"
-}
-```
-
-- **404** - No bookings found:
-```json
-{
-  "message": "No bookings found!"
+  "message": "No Bookings found",
+  "Bookings": []
 }
 ```
 

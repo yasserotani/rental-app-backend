@@ -332,4 +332,27 @@ class BookingController extends Controller
             'data' => $userBookings
         ], 200);
     }
+    public function getAllOwnerBookings()
+    {
+        // get all bookings for all owned apartments ,and order them by apartment id 
+        $ownerBookings = Booking::join('apartments', 'bookings.apartment_id', '=', 'apartments.id')
+            ->where('apartments.user_id', Auth::id())
+            ->with('apartment')
+            ->orderBy('apartments.id', 'asc')
+            ->select('bookings.*')
+            ->paginate(10);
+
+
+        if ($ownerBookings->isEmpty()) {
+            return response()->json([
+                'message' => 'No Bookings found',
+                'Bookings' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'getting owner bookings success',
+            'data' => $ownerBookings
+        ], 200);
+    }
 }

@@ -237,6 +237,9 @@ class ApartmentController extends Controller
     {
         $query = Apartment::with('images');
 
+        if ($request->filled('title')) {
+            $query->where('title', $request->governorate);
+        }
         if ($request->filled('governorate')) {
             $query->where('governorate', $request->governorate);
         }
