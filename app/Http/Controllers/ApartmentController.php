@@ -71,7 +71,7 @@ class ApartmentController extends Controller
             return response()->json(
                 [
                     'message' => 'Apartment created successfully',
-                    'data' => $apartment
+                    'data' => new ApartmentResource($apartment)
                 ],
                 200
             );
@@ -137,17 +137,23 @@ class ApartmentController extends Controller
                 ], 400);
             }
             // store the images 
+            $addedImages = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('apartment_images', 'public');
-                    $apartment->images()->create([
+                    $newImage = $apartment->images()->create([
                         'image_path' => $path,
                     ]);
+                    
+                    $addedImages[] = [
+                        'id' => $newImage->id,
+                        'image_url' => asset('storage/' . str_replace('public/', '', $newImage->image_path))
+                    ];
                 }
             }
             return response()->json([
                 'message' => 'Images added successfully',
-                'images' => $apartment->images,
+                'images' => $addedImages,
             ], 200);
         } catch (Exception $e) {
             return response()->json([

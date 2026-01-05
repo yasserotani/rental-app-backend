@@ -321,12 +321,6 @@ class BookingController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        if ($userBookings->isEmpty()) {
-            return response()->json([
-                'message' => 'No Bookings found',
-                'Bookings' => []
-            ], 200);
-        }
         return response()->json([
             'message' => 'getting user bookings success',
             'data' => $userBookings
@@ -341,14 +335,6 @@ class BookingController extends Controller
             ->orderBy('apartments.id', 'asc')
             ->select('bookings.*')
             ->paginate(10);
-
-
-        if ($ownerBookings->isEmpty()) {
-            return response()->json([
-                'message' => 'No Bookings found',
-                'Bookings' => []
-            ], 200);
-        }
 
         return response()->json([
             'message' => 'getting owner bookings success',

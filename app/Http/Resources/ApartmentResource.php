@@ -11,22 +11,21 @@ class ApartmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'userId' => $this->user_id,
+            'user_id' => $this->user_id, // Changed to match DB
             'title' => $this->title,
             'address' => $this->address,
             'description' => $this->description,
             'governorate' => $this->governorate,
             'city' => $this->city,
-            'rooms' => $this->number_of_rooms,
+            'number_of_rooms' => $this->number_of_rooms, // Changed to match DB
             'area' => $this->area,
             'price' => $this->price,
-            'isRented' => $this->is_rented,
+            'is_rented' => $this->is_rented, // Changed to match DB
             'average_rating' => $this->average_rating,
             'reviews_count' => $this->reviews_count,
             'created_at' => $this->created_at->format('Y-m-d H:i'),
 
-            'imageUrls' => $this->images->map(function ($image) {
-                // to format the images url
+            'images' => $this->images->map(function ($image) { // Changed key to 'images' to match common usage
                 return [
                     'id' => $image->id,
                     'image_url' => asset('storage/' . str_replace('public/', '', $image->image_path))
