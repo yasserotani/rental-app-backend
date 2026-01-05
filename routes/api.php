@@ -3,16 +3,15 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ReviewsController;
 use App\Http\Controllers\FavoritesController;
+use App\Http\Controllers\ReviewsController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // auth
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('check_phone_availability', [UserController::class, 'checkAvailableNumber']);
-
 
 // api that need auth
 Route::middleware('auth:sanctum')->group(function () {
@@ -30,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/apartments/search', [ApartmentController::class, 'search']);
     Route::delete('apartment', [ApartmentController::class, 'delete']);
 
-    // Booking 
+    // Booking
     Route::post('/bookings', [BookingController::class, 'createBook']);
     Route::put('/bookings/{id}/update', [BookingController::class, 'update']);
     Route::post('/bookings/{id}/approve', [BookingController::class, 'approve']);
@@ -42,14 +41,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reviews
     Route::post('/apartments/{apartment_id}/review', [ReviewsController::class, 'review']);
 
-    //favorites 
+    // favorites
     Route::post('/favorites/{apartmentId}/toggle', [FavoritesController::class, 'toggleFavorite']);
     Route::get('/favorites/', [FavoritesController::class, 'getAllUserFavorites']);
 });
 
-Route::post('login_admin', [AdminController::class, 'login_admin']);
-
 // admin
+Route::post('login_admin', [AdminController::class, 'login_admin']);
 Route::middleware(['auth:admin', 'abilities:admin'])->group(function () {
     Route::get('get_All_Users', [AdminController::class, 'get_All_Users']);
     Route::delete('delete_user/{id}', [AdminController::class, 'delete_user']);
@@ -59,5 +57,4 @@ Route::middleware(['auth:admin', 'abilities:admin'])->group(function () {
     Route::get('pending_users', [AdminController::class, 'getAllPendingsUsers']);
 });
 
-
-//2|kPGTzy2XWr4Vfm7ZGVrhU3m8M3XKsVlJfc341D9y970f7cfd
+// 2|kPGTzy2XWr4Vfm7ZGVrhU3m8M3XKsVlJfc341D9y970f7cfd
