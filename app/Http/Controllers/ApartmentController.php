@@ -13,19 +13,13 @@ class ApartmentController extends Controller
 {
     public function getAllApartments()
     {
-        $apartments = Apartment::with('images')->paginate(10);
+        $apartments = Apartment::with('images')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'message' => 'get apartments success',
             'data' => ApartmentResource::collection($apartments),
-            'pagination' => [
-                'current_page' => $apartments->currentPage(),
-                'last_page' => $apartments->lastPage(),
-                'per_page' => $apartments->perPage(),
-                'total' => $apartments->total(),
-                'next_page_url' => $apartments->nextPageUrl(),
-                'prev_page_url' => $apartments->previousPageUrl(),
-            ],
         ], 200);
     }
 
@@ -84,7 +78,7 @@ class ApartmentController extends Controller
         }
     }
 
-    // update apartment data 
+    // update apartment data
     public function updateApartment(Request $request, $id)
     {
         $request->validate([
@@ -102,7 +96,7 @@ class ApartmentController extends Controller
         $apartment = Apartment::findOrFail($id);
         if ($apartment->user_id !== Auth::id()) {
             return response()->json([
-                'message' => 'you do not own this apartment!'
+                'message' => 'You do not own this apartment!'
             ], 400);
         }
         $apartment->update($request->only([
@@ -133,37 +127,47 @@ class ApartmentController extends Controller
             // check if the user own the apartment
             if ($apartment->user_id !== Auth::id()) {
                 return response()->json([
-                    'message' => 'you do not own this apartment!'
+                    'message' => 'You do not own this apartment!'
                 ], 400);
             }
-            // store the images 
             $addedImages = [];
+            $failed = [];
+            $received = $request->hasFile('images') ? count($request->file('images')) : 0;
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('apartment_images', 'public');
-                    $newImage = $apartment->images()->create([
-                        'image_path' => $path,
-                    ]);
-                    
-                    $addedImages[] = [
-                        'id' => $newImage->id,
-                        'image_url' => asset('storage/' . str_replace('public/', '', $newImage->image_path))
-                    ];
+                    try {
+                        $path = $image->store('apartment_images', 'public');
+                        $newImage = $apartment->images()->create([
+                            'image_path' => $path,
+                        ]);
+                        $addedImages[] = [
+                            'id' => $newImage->id,
+                            'image_url' => $request->getSchemeAndHttpHost() . '/storage/' . str_replace('public/', '', $newImage->image_path)
+                        ];
+                    } catch (\Throwable $e) {
+                        $failed[] = [
+                            'name' => $image->getClientOriginalName(),
+                            'error' => $e->getMessage(),
+                        ];
+                    }
                 }
             }
             return response()->json([
                 'message' => 'Images added successfully',
                 'images' => $addedImages,
+                'received_count' => $received,
+                'added_count' => count($addedImages),
+                'failed' => $failed,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'image add failed',
+                'message' => 'Image add failed',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
-    // delete images 
+    // delete images
     public function deleteImages(Request $request, $id)
     {
         $request->validate([
@@ -278,7 +282,7 @@ class ApartmentController extends Controller
             ]
         ]);
     }
-    // delete apartment 
+    // delete apartment
 
     public function delete($id)
     {
@@ -286,7 +290,7 @@ class ApartmentController extends Controller
 
         if ($apartment->user_id !== Auth::id()) {
             return response()->json([
-                'message' => 'you do not own this apartment!'
+                'message' => 'You do not own this apartment!'
             ], 403);
         }
 
@@ -299,7 +303,7 @@ class ApartmentController extends Controller
         $apartment->delete();
 
         return response()->json([
-            'message' => 'apartment deleted successfully',
+            'message' => 'Apartment deleted successfully',
             'apartment_id' => $apartmentId
         ], 200);
     }

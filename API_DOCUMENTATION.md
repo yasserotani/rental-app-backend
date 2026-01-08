@@ -33,6 +33,50 @@ Authorization: Bearer {admin_token}
 
 ---
 
+## Changelog — آخر تحديثات الـ Backend
+ 
+- تقسيم ملف المسارات إلى ملفات فرعية منظمة ضمن [routes/api](file:///d:/Coding/Laravel/rental-app-backend/routes/api):
+  - [auth.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/auth.php)
+  - [apartments.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/apartments.php)
+  - [bookings.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/bookings.php)
+  - [admin.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/admin.php)
+  - الملف الرئيسي الآن يستدعي هذه الملفات: [api.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api.php)
+ 
+- إضافة مسار بديل للحجوزات الخاصة بالمالك لتوافق كود Flutter:
+  - المسارات المتاحة الآن:
+    - GET /api/bookings/owner
+    - GET /api/owner/bookings (Alias)
+  - التعريف موجود في [bookings.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/bookings.php).
+ 
+- إصلاح مسار حذف الشقة:
+  - أصبح DELETE /api/apartment/{id} بدلاً من DELETE /api/apartment.
+  - التعريف موجود في [apartments.php](file:///d:/Coding/Laravel/rental-app-backend/routes/api/apartments.php).
+ 
+- توحيد شكل الاستجابة في مورد الشقق [ApartmentResource](file:///d:/Coding/Laravel/rental-app-backend/app/Http/Resources/ApartmentResource.php):
+  - اعتماد مفاتيح بـ snake_case المتوافقة مع قاعدة البيانات:
+    - user_id, number_of_rooms, is_rented
+  - تغيير حقل الصور إلى images وهو مصفوفة كائنات بالشكل:
+    {
+      "id": 1,
+      "image_url": "http://your-domain.com/storage/..."
+    }
+  - إزالة المفاتيح القديمة غير الموحدة مثل userId, rooms, imageUrls.
+ 
+- تحسين رفع الصور في [ApartmentController](file:///d:/Coding/Laravel/rental-app-backend/app/Http/Controllers/ApartmentController.php):
+  - دالة الإنشاء createApartments تعيد الآن كائن موحد عبر ApartmentResource.
+  - دالة إضافة الصور addImages تعيد قائمة images تحتوي على image_url الكامل بدلاً من المسار المحلي.
+ 
+- توحيد استجابة صفحات الحجوزات في [BookingController](file:///d:/Coding/Laravel/rental-app-backend/app/Http/Controllers/BookingController.php):
+  - دوال getAllUserBookings و getAllOwnerBookings تعيد دائماً كائن الترحيل (Pagination) ضمن المفتاح data.
+  - على العملاء قراءة قائمة الحجوزات من data.data.
+ 
+ملاحظات تكامل للواجهات (Flutter):
+- استخدم data.data لاستخراج القوائم في استجابات الترحيل (Bookings).
+- لمسار حجوزات المالك يمكنك استخدام أي من:
+  - /api/bookings/owner أو /api/owner/bookings.
+- عند عرض صور الشقة استخدم الحقل images ثم image_url.
+- عند حذف شقة استخدم المسار: DELETE /api/apartment/{id}.
+
 ## User Authentication
 
 ### 1. Register User
@@ -1636,4 +1680,3 @@ String formatDate(DateTime date) {
 ---
 
 **Last Updated:** January 2025
-

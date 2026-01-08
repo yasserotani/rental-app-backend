@@ -15,10 +15,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/apartments/{id}/images', [ApartmentController::class, 'deleteImages']);
     Route::get('apartment_bookings/{id}', [ApartmentController::class, 'getAllApartmentBookings']);
     Route::get('/apartments/search', [ApartmentController::class, 'search']);
-    Route::delete('apartment/{id}', [ApartmentController::class, 'delete']);
+    Route::delete('apartment', [ApartmentController::class, 'delete']);
 
     // Reviews
     Route::post('/apartments/{apartment_id}/review', [ReviewsController::class, 'review']);
+    Route::get('/my-reviews', [ReviewsController::class, 'getMyReviews']);
 
     // Favorites
     Route::post('/favorites/{apartmentId}/toggle', [FavoritesController::class, 'toggleFavorite']);

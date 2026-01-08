@@ -11,4 +11,6 @@ Route::post('check_phone_availability', [UserController::class, 'checkAvailableN
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
     Route::get('self', [UserController::class, 'getUser']);
+    Route::post('user/update', [UserController::class, 'updateUserProfile']);
+    Route::post('user/change-password', [UserController::class, 'changePassword']);
 });

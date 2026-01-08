@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Admin;
@@ -13,35 +14,10 @@ class AdminController extends Controller
 
     public function get_All_Users(Request $request)
     {
-        try {
-            $users = User::orderBy('created_at', 'desc')->paginate(10);
-
-            $usersData = $users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'full_name' => $user->first_name . ' ' . $user->last_name,
-                    'phone' => $user->phone,
-                    'birth_date' => $user->birth_date,
-                    'status' => $user->status,
-                    'profile_image_url' => $user->profile_image
-                        ? asset('storage/' . str_replace('public/', '', $user->profile_image))
-                        : null,
-                ];
-            });
-
-            return response()->json([
-                'message' => 'Get all users success',
-                'data' => $usersData
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to get users',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $users = User::orderBy('created_at', 'desc')->paginate(10);
+        return UserResource::collection($users);
     }
+
     public function login_admin(Request $request)
     {
         $request->validate([
@@ -68,12 +44,12 @@ class AdminController extends Controller
         $user = User::find($id);
         if (!$user) {
             return response()->json([
-                'message' => 'user not fond'
+                'message' => 'User not found'
             ], 404);
         } else {
             $user->delete();
             return response()->json([
-                'message' => 'user deleted success',
+                'message' => 'User deleted successfully',
             ], 200);
         }
     }
@@ -113,11 +89,9 @@ class AdminController extends Controller
                 'message' => 'User not found'
             ], 404);
         }
-        return response()->json([
-            'message' => 'User get successfully',
-            'data' => $user
-        ], 200);
+        return new UserResource($user);
     }
+
     public function getAllPendingsUsers()
     {
         $pendingUsers = User::where('status', 'pending')->get();
@@ -127,9 +101,6 @@ class AdminController extends Controller
                 'message' => 'There are no pending users'
             ], 404);
         }
-        return response()->json([
-            'message' => 'success',
-            'data' => $pendingUsers
-        ]);
+        return UserResource::collection($pendingUsers);
     }
 }

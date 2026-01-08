@@ -69,4 +69,16 @@ class ReviewsController extends Controller
             'review' => $review
         ], 201);
     }
+
+    public function getMyReviews(Request $request)
+    {
+        $user = Auth::user();
+
+        $reviews = $user->reviews()->with('apartment')->get();
+
+        return response()->json([
+            'message' => 'Successfully retrieved your reviews',
+            'data' => $reviews,
+        ], 200);
+    }
 }

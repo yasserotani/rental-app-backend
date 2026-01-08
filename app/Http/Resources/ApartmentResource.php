@@ -25,10 +25,10 @@ class ApartmentResource extends JsonResource
             'reviews_count' => $this->reviews_count,
             'created_at' => $this->created_at->format('Y-m-d H:i'),
 
-            'images' => $this->images->map(function ($image) { // Changed key to 'images' to match common usage
+            'images' => $this->images->map(function ($image) use ($request) { // build absolute URL based on request host
                 return [
                     'id' => $image->id,
-                    'image_url' => asset('storage/' . str_replace('public/', '', $image->image_path))
+                    'image_url' => $request->getSchemeAndHttpHost() . '/storage/' . str_replace('public/', '', $image->image_path)
                 ];
             }),
 

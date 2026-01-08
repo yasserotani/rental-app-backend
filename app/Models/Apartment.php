@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Review;
-use App\Models\Favorites;
+use App\Models\Favorite;
 
 class Apartment extends Model
 {
@@ -24,6 +24,15 @@ class Apartment extends Model
         'is_rented',
         'average_rating',
         'reviews_count',
+    ];
+
+    protected $casts = [
+        'is_rented' => 'boolean',
+        'price' => 'float',
+        'area' => 'float',
+        'average_rating' => 'float',
+        'reviews_count' => 'integer',
+        'number_of_rooms' => 'integer',
     ];
 
     public function user()
